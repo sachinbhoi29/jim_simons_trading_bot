@@ -1,0 +1,79 @@
+# Byte-compiled / cached files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Log files
+*.log
+*.out
+*.err
+
+# Data files
+*.csv
+*.tsv
+*.json
+*.xml
+
+# Excel files
+*.xls
+*.xlsx
+*.xlsm
+*.xlsb
+
+# PDF and other documents
+*.pdf
+*.ppt
+*.pptx
+
+# Images and media files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.svg
+*.mp4
+*.avi
+*.mov
+*.mp3
+*.wav
+
+# Archives and compressed files
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# Database and SQLite files
+*.db
+*.sqlite
+*.sqlite3
+
+# System-specific files
+.DS_Store
+Thumbs.db
+
+# Editor backups and IDE files
+*.swp
+*.swo
+*.bak
+*.tmp
+*.idea/
+*.vscode/
+
+# Node.js dependencies (if applicable)
+node_modules/
+npm-debug.log
+
+# Python dependencies
+Pipfile.lock
+requirements.txt
