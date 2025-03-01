@@ -14,7 +14,7 @@ from nselib import capital_market
 # Load configuration
 config = configparser.ConfigParser()
 config.read("config.ini")
-
+CACHE_LOG_FILE = "cache_log.csv"
 
 class DataSource(ABC):
     """Abstract Base Class for different data sources."""
@@ -39,7 +39,7 @@ def get_free_proxies():
         print(f"❌ Error fetching proxies: {e}")
         return []    
 
-
+# Yahoo is restricting the data, not working
 class YahooFinanceDataSource(DataSource):
     """Concrete Implementation using Yahoo Finance with Optional Proxy Support."""
     def __init__(self):
@@ -93,33 +93,6 @@ class YahooFinanceDataSource(DataSource):
                 print(f"❌ Error fetching data for {symbol}: {e}")
             
             return None
-
-
-class NSEIndiaDataSource(DataSource):
-    """Concrete Implementation using NSE India API."""
-    NSE_URL = "https://www.nseindia.com/api/quote-equity"
-
-    def fetch_data(self, symbol, period, interval):
-        print(f"Fetching market data from NSE India for {symbol}...")
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-        }
-        params = {"symbol": symbol}
-        response = requests.get(self.NSE_URL, headers=headers, params=params)
-
-        if response.status_code == 200:
-            json_data = response.json()
-            if "priceInfo" in json_data:
-                df = pd.DataFrame([json_data["priceInfo"]])
-                df["Symbol"] = symbol
-                print(f"✅ Data fetched successfully for {symbol}!")
-                return df
-            else:
-                print(f"⚠️ No price data found for {symbol}.")
-        else:
-            print(f"⚠️ Error fetching data for {symbol}. HTTP {response.status_code}")
-        
-        return None
 
 
 class NSELibDataSource(DataSource):
@@ -184,7 +157,7 @@ class NSELibDataSource(DataSource):
 
 
 
-CACHE_LOG_FILE = "cache_log.csv"
+
 
 class DataHandler:
     def __init__(self):
@@ -281,39 +254,73 @@ class DataHandler:
 
     def load_data(self):
         """Loads stored market data from CSV files, fetching new data if necessary."""
-        stock_data = {}
+        stock_data = {}  # Dictionary to store stock data and metadata
         today = datetime.datetime.today().strftime("%Y-%m-%d")
 
         for symbol in self.symbols:
             filename = f"data/{symbol}_{self.interval}_{self.period}.csv"
-            # If file exists and is up to date, then just read it, else if not fresh or data not available then download it and do it for each stock
-            if os.path.exists(filename) and self.is_data_up_to_date(symbol):
-                print(f"📂 Loading cached data for {symbol} from {filename}")
-                stock_data[symbol] = pd.read_csv(filename)
-            else:
-                print(f"⚠️ No up-to-date cached data found for {symbol}. Fetching new data...")
-                df = self.data_source.fetch_data(symbol, self.period, self.interval)
-                if df is not None:
-                    df.to_csv(filename, index=True)
-                    stock_data[symbol] = df
 
-                    # Update cache log
-                    self.cache_log = self.cache_log[
-                        ~((self.cache_log["symbol"] == symbol) & (self.cache_log["period"] == self.period) & (self.cache_log["interval"] == self.interval))
-                    ]  # Remove old entry if it exists
-                    new_entry = pd.DataFrame([[symbol, self.period, self.interval, filename, today]],
-                                             columns=["symbol", "period", "interval", "filename", "last_updated"])
-                    self.cache_log = pd.concat([self.cache_log, new_entry], ignore_index=True)
-                    self.save_cache_log()
+            # Check if cached data exists for this stock
+            cached_data = self.cache_log[
+                (self.cache_log["symbol"] == symbol) &
+                (self.cache_log["period"] == self.period) &
+                (self.cache_log["interval"] == self.interval)
+            ]
 
-        return stock_data
+            if os.path.exists(filename) and not cached_data.empty:
+                last_updated = cached_data.iloc[0]["last_updated"]
+
+                # If data is from today or last market close, load from cache
+                if last_updated == today or self.is_last_market_day(last_updated):
+                    print(f"📂 Loading cached data for {symbol} from {filename} (Last Updated: {last_updated})")
+                    df = pd.read_csv(filename)
+                    stock_data[symbol] = {
+                        "data": df,
+                        "metadata": {
+                            "last_updated": last_updated,
+                            "source": filename}}
+                    continue  # Skip fetching new data if cache is valid
+            # If no valid cache, fetch new data
+            print(f"⚠️ No up-to-date cached data found for {symbol}. Fetching new data...")
+            df = self.data_source.fetch_data(symbol, self.period, self.interval)
+
+            if df is not None:
+                df.to_csv(filename, index=True)
+                stock_data[symbol] = {
+                    "data": df,
+                    "metadata": {
+                        "last_updated": today,
+                        "source": filename
+                    }
+                }
+
+                # Update cache log
+                self.cache_log = self.cache_log[
+                    ~((self.cache_log["symbol"] == symbol) & (self.cache_log["period"] == self.period) & (self.cache_log["interval"] == self.interval))
+                ]  # Remove old entry if it exists
+                new_entry = pd.DataFrame([[symbol, self.period, self.interval, filename, today]],
+                                        columns=["symbol", "period", "interval", "filename", "last_updated"])
+                self.cache_log = pd.concat([self.cache_log, new_entry], ignore_index=True)
+                self.save_cache_log()
+
+        return stock_data  # Returns a dictionary with DataFrames and metadata
+
     
 # Example usage:
 if __name__ == "__main__":
     handler = DataHandler()
-    handler.fetch_and_store_data()
     stock_data = handler.load_data()
 
-    for symbol, df in stock_data.items():
-        print(f"\n📌 {symbol} Data Sample:")
-        print(df.head())  # Display first few rows
+    print('stock_data',stock_data)
+    # Access Reliance's market data
+    reliance_data = stock_data.get("RELIANCE")
+
+    if reliance_data:
+        print("\n📊 Reliance Market Data:")
+        print(reliance_data["data"].head())  # Show first few rows of the DataFrame
+        print("\n📋 Metadata:")
+        print(reliance_data["metadata"])  # Show last updated date and source
+    else:
+        print("⚠️ Reliance data not available.")
+
+
