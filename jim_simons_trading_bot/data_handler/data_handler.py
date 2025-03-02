@@ -13,8 +13,8 @@ from nselib import capital_market
 
 # Load configuration
 config = configparser.ConfigParser()
-config.read("config.ini")
-CACHE_LOG_FILE = "cache_log.csv"
+config.read("config/config.ini")
+CACHE_LOG_FILE = "log/cache_log.csv"
 
 class DataSource(ABC):
     """Abstract Base Class for different data sources."""
