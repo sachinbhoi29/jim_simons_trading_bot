@@ -3,5 +3,6 @@ from pipeline.trading_bot_pipeline import pilotPipeline
 
 if __name__ == "__main__":
     pp = pilotPipeline()
-    stock_data = pp.get_data()
+    df = pp.regime_detector()
+    pp.markvo_chain(df)
 
