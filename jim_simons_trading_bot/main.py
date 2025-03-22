@@ -8,4 +8,7 @@ if __name__ == "__main__":
     pp.markvo_chain()
     pp.indicators_calculation()
     pp.price_action()
+    stock_nifty_combined = pp.merge_stock_with_nifty_regime()
+    stock_nifty_combined.to_csv("data/stock_nifty_combined.csv")
+
 

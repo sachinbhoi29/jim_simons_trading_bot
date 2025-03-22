@@ -5,16 +5,19 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.ensemble import RandomForestClassifier
+from pandas.tseries.offsets import BDay
+
 
 
 class MarketRegimeForecaster:
-    def __init__(self, df=None, file_path=None):
+    def __init__(self, regimes_df=None, file_path=None,combined_actual_and_forecast_file_name = None):
         """
         Initializes the Market Regime Forecaster.
         :param file_path: Path to the processed market data CSV file.
         """
         self.file_path = file_path
-        self.df = df
+        self.combined_actual_and_forecast_file_name = combined_actual_and_forecast_file_name
+        self.df = regimes_df
         self.transition_matrix = None
         self.rf_model = RandomForestClassifier(n_estimators=200, max_depth=10, random_state=42)
         self.regime_mapping = {}
@@ -124,10 +127,10 @@ class MarketRegimeForecaster:
             state = combined_prediction
 
         # Save Forecast Results
-        forecast_df = pd.DataFrame({"Day": np.arange(1, days + 1), "Predicted Regime": future_predictions, "Confidence (%)": np.round(confidence_scores, 2)})
-        forecast_file = os.path.join(self.data_dir, "market_regime_forecast.csv")
-        forecast_df.to_csv(forecast_file, index=False)
-        print(f"Forecast saved to {forecast_file}")
+        self.forecast_df = pd.DataFrame({"Day": np.arange(1, days + 1), "Predicted Regime": future_predictions, "Confidence (%)": np.round(confidence_scores, 2)})
+        # forecast_file = os.path.join(self.data_dir, "market_regime_forecast.csv")
+        # forecast_df.to_csv(forecast_file, index=False)
+        # print(f"Forecast saved to {forecast_file}")
 
     def save_transition_plot(self):
         """Saves the transition probability heatmap plot."""
@@ -143,6 +146,48 @@ class MarketRegimeForecaster:
         plt.savefig(plot_file, dpi=300, bbox_inches="tight")
         plt.close()
         print(f"Transition probability plot saved to {plot_file}")
+
+
+    def save_combined_actual_and_forecast(self):
+        """Saves a combined dataframe with actual data and appended forecasted regimes with adjusted dates."""
+
+
+        # Create a copy of original dataframe with 'Forecasted Regime' column
+        combined_df = self.df.copy()
+        combined_df["Forecasted Regime"] = np.nan
+
+        # Generate forecasted dates (business days only)
+        last_date = combined_df.index[-1]
+        forecast_dates = []
+        next_day = last_date
+        while len(forecast_dates) < len(self.forecast_df):
+            next_day += BDay(1)  # next business day
+            forecast_dates.append(next_day)
+
+        # Create forecast DataFrame indexed by forecasted dates
+        forecast_only_df = pd.DataFrame({
+            "Date": forecast_dates,
+            "Forecasted Regime": self.forecast_df["Predicted Regime"].values
+        })
+        forecast_only_df.set_index("Date", inplace=True)
+
+        # Create empty columns matching original df
+        empty_cols = combined_df.columns.difference(["Forecasted Regime"])
+        for col in empty_cols:
+            forecast_only_df[col] = np.nan
+        forecast_only_df = forecast_only_df[combined_df.columns]  # order columns
+
+        # Combine historical + forecast
+        final_df = pd.concat([combined_df, forecast_only_df])
+        final_df.index.name = "Date"
+
+        # Save the combined DataFrame
+        final_path = os.path.join(self.data_dir, self.combined_actual_and_forecast_file_name)
+        final_df.to_csv(final_path)
+        print(f"Combined actual and forecasted data saved to {final_path}")
+
+        self.combined_actual_and_forecast_df = final_df
+
 
     def run_forecast_pipeline(self):
         """Runs the full forecasting pipeline."""
@@ -160,6 +205,11 @@ class MarketRegimeForecaster:
 
         print("Saving transition heatmap plot...")
         self.save_transition_plot()
+
+        print("Saving combined actual and forecast data...")
+        self.save_combined_actual_and_forecast()
+
+        return self.combined_actual_and_forecast_df
 
 
 # === Usage Example ===

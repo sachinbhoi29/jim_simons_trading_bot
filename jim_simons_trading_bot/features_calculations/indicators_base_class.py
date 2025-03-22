@@ -39,5 +39,5 @@ class IndicatorBase:
         self.df["Support"] = self.df["Low"].rolling(20).min()
         self.df["Resistance"] = self.df["High"].rolling(20).max()
 
-        self.df.dropna(inplace=True)
+        # self.df.dropna(inplace=True)
         return self.df
