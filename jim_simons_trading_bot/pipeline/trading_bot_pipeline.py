@@ -4,10 +4,10 @@ from regimes.markov_chain_and_ml import MarketRegimeForecaster
 from features_calculations.indicators_base_class import IndicatorBase
 from features_calculations.price_action_base_class import PriceActionBase
 import pandas as pd
-from utils.common_functions import merge_stock_with_nifty_regime
+from utils.common_functions import merge_stock_with_nifty_regime,normalize_ohlcv_columns
 
 
-stock_to_analyze = 'data/SBIN_4h_1y.csv'
+stock_to_analyze = 'data/ICICIBANK_4h_1y.csv'
 class pilotPipeline:
     def __init__(self):
         pass
@@ -33,6 +33,7 @@ class pilotPipeline:
         print("Part 2: Stock Feature Calculations")
         print("Step 4: Calculating technical indicators...")
         stock_df = pd.read_csv(stock_to_analyze)
+        stock_df = normalize_ohlcv_columns(stock_df)
         if stock_df.empty:
             print("Error: stock_df is empty. Please provide a valid DataFrame.")
             return

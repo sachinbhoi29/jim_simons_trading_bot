@@ -14,7 +14,10 @@ def merge_stock_with_nifty_regime(stock_df: pd.DataFrame, nifty_df: pd.DataFrame
     """
     # Convert stock date to datetime
     stock_df = stock_df.copy()
-    stock_df["Date"] = pd.to_datetime(stock_df["Date"], format="%d-%b-%y")
+    # stock_df["Date"] = pd.to_datetime(stock_df["Date"], format="%d-%b-%y")
+    
+    stock_df["Date"] = pd.to_datetime(stock_df["Date"], format="mixed", dayfirst=True)
+
     
     # Convert NIFTY date to naive datetime (drop timezone)
     nifty_df = nifty_df.copy()
@@ -38,3 +41,41 @@ def merge_stock_with_nifty_regime(stock_df: pd.DataFrame, nifty_df: pd.DataFrame
 
 
     return merged_df
+
+def normalize_ohlcv_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Renames alternate column names to standard OHLCV format.
+
+    Standardized columns:
+        - 'Open'
+        - 'High'
+        - 'Low'
+        - 'Close'
+        - 'Volume'
+
+    Accepts typical NSE/BSE column names like 'OpenPrice', 'ClosePrice', 'TotalTradedQuantity', etc.
+
+    Args:
+        df (pd.DataFrame): Raw DataFrame with market data.
+
+    Returns:
+        pd.DataFrame: Renamed DataFrame with standardized OHLCV columns.
+    """
+    col_map = {
+        "OpenPrice": "Open",
+        "HighPrice": "High",
+        "LowPrice": "Low",
+        "ClosePrice": "Close",
+        "TotalTradedQuantity": "Volume",
+        "TradedQty": "Volume", 
+    }
+
+    # Only rename columns that exist in the DataFrame
+    renamed_df = df.rename(columns={k: v for k, v in col_map.items() if k in df.columns})
+
+    # Convert all relevant columns to numeric (after removing commas)
+    for col in ["Open", "High", "Low", "Close", "Volume"]:
+        if col in renamed_df.columns:
+            renamed_df[col] = renamed_df[col].astype(str).str.replace(",", "").astype(float)
+
+    return renamed_df
