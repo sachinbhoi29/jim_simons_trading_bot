@@ -23,6 +23,7 @@ class pilotPipeline:
         print("Step 2: Detecting market regimes...")
         detector = MarketRegimeDetector(file_path="data/NIFTY50_1d_5y.csv")
         self.regimes_df = detector.run_regime_detector()
+        
 
     def markvo_chain(self):
         print("Step 3: Forecasting future market regimes...")

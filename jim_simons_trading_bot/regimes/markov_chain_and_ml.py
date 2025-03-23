@@ -22,6 +22,7 @@ class MarketRegimeForecaster:
         self.rf_model = RandomForestClassifier(n_estimators=200, max_depth=10, random_state=42)
         self.regime_mapping = {}
         self.reverse_mapping = {}
+        print(self.df.columns)
 
         # Output directories
         self.plot_dir = "plots/"
@@ -33,18 +34,6 @@ class MarketRegimeForecaster:
         """Loads the processed market data and computes additional technical indicators."""
         if self.df is None or self.df.empty:
             self.df = pd.read_csv(self.file_path, parse_dates=["Date"], index_col="Date")
-
-        # Compute Technical Indicators
-        self.df["50EMA"] = self.df["Close"].ewm(span=50, adjust=False).mean()
-        self.df["200EMA"] = self.df["Close"].ewm(span=200, adjust=False).mean()
-        self.df["RSI"] = 100 - (100 / (1 + self.df["Close"].diff().rolling(14).mean() / self.df["Close"].diff().rolling(14).std()))
-        self.df["ATR"] = self.df["High"].rolling(14).max() - self.df["Low"].rolling(14).min()
-        self.df["MACD"] = self.df["Close"].ewm(span=12, adjust=False).mean() - self.df["Close"].ewm(span=26, adjust=False).mean()
-        self.df["Signal"] = self.df["MACD"].ewm(span=9, adjust=False).mean()
-        self.df["BB_Width"] = (self.df["High"].rolling(20).max() - self.df["Low"].rolling(20).min()) / self.df["Close"].rolling(20).mean()
-        self.df["OBV"] = (np.sign(self.df["Close"].diff()) * self.df["Volume"]).cumsum()
-        self.df["Support"] = self.df["Low"].rolling(20).min()
-        self.df["Resistance"] = self.df["High"].rolling(20).max()
 
     def compute_transition_matrix(self):
         """Computes the Markov transition probability matrix from historical regime changes."""
