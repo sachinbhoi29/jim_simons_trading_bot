@@ -39,5 +39,11 @@ class IndicatorBase:
         self.df["Support"] = self.df["Low"].rolling(20).min()
         self.df["Resistance"] = self.df["High"].rolling(20).max()
 
+        # Donchian Channel
+        donchian_period = 20  # you can customize this
+        self.df["Donchian_Upper"] = self.df["High"].rolling(window=donchian_period).max()
+        self.df["Donchian_Lower"] = self.df["Low"].rolling(window=donchian_period).min()
+        self.df["Donchian_Mid"] = (self.df["Donchian_Upper"] + self.df["Donchian_Lower"]) / 2
+
         # self.df.dropna(inplace=True)
         return self.df

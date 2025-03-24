@@ -7,7 +7,7 @@ import pandas as pd
 from utils.common_functions import merge_stock_with_nifty_regime,normalize_ohlcv_columns
 
 
-stock_to_analyze = 'data/ICICIBANK_4h_1y.csv'
+stock_to_analyze = 'data/SBIN_5yr_daily.csv'
 class pilotPipeline:
     def __init__(self):
         pass
