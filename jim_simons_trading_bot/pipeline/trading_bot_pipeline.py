@@ -7,7 +7,7 @@ import pandas as pd
 from utils.common_functions import merge_stock_with_nifty_regime,normalize_ohlcv_columns
 
 
-stock_to_analyze = 'data/SBIN_5yr_daily.csv'
+stock_to_analyze = 'data/TCS_3yr_daily.csv'
 class pilotPipeline:
     def __init__(self):
         pass
@@ -20,19 +20,20 @@ class pilotPipeline:
         return stock_data
     
     def regime_detector(self):
-        print("Step 2: Detecting market regimes...")
+        print("Step 2: Detecting market regimes from NIFTY50...")
         detector = MarketRegimeDetector(file_path="data/NIFTY50_1d_5y.csv")
         self.regimes_df = detector.run_regime_detector()
         
 
     def markvo_chain(self):
         print("Step 3: Forecasting future market regimes...")
+        print("!!! Remember you cannot rely on the forecasted regimes")
         forecaster = MarketRegimeForecaster(regimes_df = self.regimes_df,combined_actual_and_forecast_file_name="combined_actual_and_forecast.csv")
         self.nifty_combined_actual_and_forecast_df = forecaster.run_forecast_pipeline()
     
     def indicators_calculation(self,stock_df= None):
         print("Part 2: Stock Feature Calculations")
-        print("Step 4: Calculating technical indicators...")
+        print("Step 4: Calculating technical indicators for the stocks...")
         stock_df = pd.read_csv(stock_to_analyze)
         stock_df = normalize_ohlcv_columns(stock_df)
         if stock_df.empty:

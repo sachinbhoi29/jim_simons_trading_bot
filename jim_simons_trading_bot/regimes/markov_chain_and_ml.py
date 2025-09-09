@@ -139,8 +139,7 @@ class MarketRegimeForecaster:
 
     def save_combined_actual_and_forecast(self):
         """Saves a combined dataframe with actual data and appended forecasted regimes with adjusted dates."""
-
-
+        
         # Create a copy of original dataframe with 'Forecasted Regime' column
         combined_df = self.df.copy()
         combined_df["Forecasted Regime"] = np.nan

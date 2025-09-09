@@ -10,6 +10,6 @@ if __name__ == "__main__":
     pp.indicators_calculation()
     pp.price_action()
     stock_nifty_combined = pp.merge_stock_with_nifty_regime()
-    stock_nifty_combined.to_csv("data/sbin_nifty_combined.csv")
+    stock_nifty_combined.to_csv("data/tcs_nifty_combined.csv")
 
 
