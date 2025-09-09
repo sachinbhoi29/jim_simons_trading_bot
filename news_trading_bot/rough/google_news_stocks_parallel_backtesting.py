@@ -1,10 +1,13 @@
 import feedparser
 import urllib.parse
 import csv
-from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
 import pandas as pd
+from datetime import datetime, timedelta, timezone,time
+from zoneinfo import ZoneInfo
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
+# Constants
+IST = ZoneInfo("Asia/Kolkata")
 # Sample list of 10 NSE stock names\
 LARGE_CAP_STOCKS = [
     "Reliance", "TCS", "HDFC Bank", "Infosys", "ICICI Bank", "Hindustan Unilever",
@@ -83,7 +86,6 @@ SMALL_CAP_STOCKS = ["Laurus Labs", "Godfrey Phillips", "Delhivery", "Aster DM He
     "CSB Bank", "DCB Bank", "Repco Home Finance"
                 ]
 
-
 STOCKS = LARGE_CAP_STOCKS + MID_CAP_STOCKS +SMALL_CAP_STOCKS
 
 # Base query template to customize per stock
@@ -106,7 +108,6 @@ STOCKS = LARGE_CAP_STOCKS + MID_CAP_STOCKS +SMALL_CAP_STOCKS
 BASE_QUERY_TEMPLATE = '"{}" stock OR "{}" shares OR "{}" NSE OR "{}" BSE OR "{}" earnings OR "{}" news'
 
 def build_rss_url(query):
-    """Build the Google News RSS URL for a given query."""
     base_url = "https://news.google.com/rss/search"
     params = {
         "q": query,
@@ -117,23 +118,17 @@ def build_rss_url(query):
     return f"{base_url}?{urllib.parse.urlencode(params)}"
 
 def fetch_news_for_stock(stock_name, start_dt=None, end_dt=None):
-    """Fetch news for a stock between start_dt and end_dt (both in IST)."""
-    ist = ZoneInfo("Asia/Kolkata")
-    now_ist = datetime.now(ist)
-
     if end_dt is None:
-        end_dt = now_ist
+        end_dt = datetime.now(IST)
     if start_dt is None:
         start_dt = end_dt - timedelta(days=1)
 
-    # Convert to UTC for comparison (Google RSS gives UTC timestamps)
     start_dt_utc = start_dt.astimezone(timezone.utc)
     end_dt_utc = end_dt.astimezone(timezone.utc)
 
     # query = BASE_QUERY_TEMPLATE.format(stock=stock_name)
     query = BASE_QUERY_TEMPLATE.format(*([stock_name] * 6))
     rss_url = build_rss_url(query)
-    print(f"Searching news for: {stock_name}")
 
     feed = feedparser.parse(rss_url)
     stock_news = []
@@ -153,14 +148,12 @@ def fetch_news_for_stock(stock_name, start_dt=None, end_dt=None):
                     "published": published_str,
                     "summary": entry.get("summary", "").strip().replace('\n', ' ')
                 })
-        except Exception as e:
+        except Exception:
             continue
 
-    print(f"   → {len(stock_news)} news items found in given time window.\n")
     return stock_news
 
 def save_to_csv(news_items, filename):
-    """Save the collected news items to a CSV file."""
     if not news_items:
         print("No news to save.")
         return
@@ -174,28 +167,47 @@ def save_to_csv(news_items, filename):
 
 # Main execution
 if __name__ == "__main__":
-    print("📡 Fetching stock-specific news from Google News (last 24 hours)...\n")
-    ist = ZoneInfo("Asia/Kolkata")
-    end_dt = datetime.now(ist)
-    start_dt = end_dt - timedelta(days=1)
-    print(f"The start date time is {start_dt} and end date time is {end_dt}")
+
+    print("Fetching stock-specific news from Google News (last 24 hours)...\n")
+    # end_dt = datetime.now(IST)
+    # start_dt = end_dt - timedelta(days=1)
+
+    # Define dates
+    start_date = datetime(2025, 9, 8)
+    end_date = datetime(2025, 9, 9)
+    # Define time of day (e.g., 09:15 AM)
+    start_time_of_day = time(15, 15)
+    end_time_of_day = time(9, 15)
+    # Combine date + time with IST timezone
+    start_dt = datetime.combine(start_date, start_time_of_day, IST)
+    end_dt = datetime.combine(end_date, end_time_of_day, IST)
+    print(f"Time window: {start_dt} to {end_dt}")
+
+
     all_news = []
 
-    for stock in STOCKS:
-        news = fetch_news_for_stock(stock, start_dt=start_dt, end_dt=end_dt)
-        all_news.extend(news)
+    with ThreadPoolExecutor(max_workers=16) as executor:
+        future_to_stock = {
+            executor.submit(fetch_news_for_stock, stock, start_dt, end_dt): stock
+            for stock in STOCKS
+        }
+
+        for future in as_completed(future_to_stock):
+            stock = future_to_stock[future]
+            try:
+                stock_news = future.result()
+                all_news.extend(stock_news)
+                print(f"Fetched {len(stock_news)} news items for {stock}")
+            except Exception as e:
+                print(f"Error fetching news for {stock}: {e}")
 
     if all_news:
         df = pd.DataFrame(all_news)
 
-        # Convert "published" column to datetime and change to IST
         df['published'] = pd.to_datetime(df['published'], utc=True)
-        df['published'] = df['published'].dt.tz_convert('Asia/Kolkata')
-
-        # Optional: Format datetime as string (e.g., "2024-09-08 13:45:00 IST")
+        df['published'] = df['published'].dt.tz_convert(IST)
         df['published'] = df['published'].dt.strftime("%Y-%m-%d %H:%M:%S %Z")
 
-        # Save using end date's IST string
         date_str = end_dt.strftime("%Y%m%d_%H%M")
         filename = f"stock_news_{date_str}.csv"
         df.to_csv(filename, index=False, encoding='utf-8')
