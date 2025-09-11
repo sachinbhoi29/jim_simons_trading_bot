@@ -11,8 +11,8 @@ STOCK = "Larsen "
 
 BASE_QUERY_TEMPLATE = (
     '"{stock}" AND ('
-    '"NSE earnings" OR "quarterly earnings" OR "financial results" OR '
-    '"net profit" OR "EPS" OR "revenue growth" OR "top line" OR "bottom line" OR '
+    '"NSE earnings" OR "Q1" OR "Q2" OR "Q3" OR "Q4" OR "quarterly earnings" OR "financial results" OR '
+    '"net profit" OR "net loss" OR "EPS" OR "revenue growth" OR "top line" OR "bottom line" OR '
     '"dividend" OR "interim dividend" OR "final dividend" OR "dividend cut" OR '
     '"bonus issue" OR "stock split" OR "buyback" OR "buyback announcement" OR '
     '"CEO resignation" OR "CFO resignation" OR "MD resignation" OR "new CEO" OR '

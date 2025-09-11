@@ -13,7 +13,7 @@ LARGE_CAP_STOCKS = [
     "Reliance", "TCS", "HDFC Bank", "Infosys", "ICICI Bank", "Hindustan Unilever",
     "SBI", "Larsen & Toubro", "Axis Bank", "Bajaj Finance", "Kotak Mahindra Bank",
     "ITC", "Bharti Airtel", "Maruti Suzuki", "Sun Pharma", "Wipro", "HCL Technologies",
-    "Mahindra & Mahindra", "NTPC", "Power Grid", "Tata Motors", "UltraTech Cement",
+    "Mahindra", "NTPC", "Power Grid", "Tata Motors", "UltraTech Cement",
     "Adani Ports", "Cipla", "Dr. Reddy's", "Nestle India", "Bajaj Finserv",
     "Divi's Laboratories", "JSW Steel", "Tata Steel", "Coal India", "Grasim",
     "HDFC Life", "Tech Mahindra", "UPL", "Britannia", "Eicher Motors", "Hindalco",
@@ -168,13 +168,13 @@ def save_to_csv(news_items, filename):
 # Main execution
 if __name__ == "__main__":
 
-    print("Fetching stock-specific news from Google News (last 24 hours)...\n")
+    print("Fetching stock-specific news from Google News...\n")
     # end_dt = datetime.now(IST)
     # start_dt = end_dt - timedelta(days=1)
 
     # Define dates
-    start_date = datetime(2025, 9, 8)
-    end_date = datetime(2025, 9, 9)
+    start_date = datetime(2025, 9, 1)
+    end_date = datetime(2025, 9, 2)
     # Define time of day (e.g., 09:15 AM)
     start_time_of_day = time(15, 15)
     end_time_of_day = time(9, 15)
@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
     all_news = []
 
-    with ThreadPoolExecutor(max_workers=16) as executor:
+    with ThreadPoolExecutor(max_workers=32) as executor:
         future_to_stock = {
             executor.submit(fetch_news_for_stock, stock, start_dt, end_dt): stock
             for stock in STOCKS
