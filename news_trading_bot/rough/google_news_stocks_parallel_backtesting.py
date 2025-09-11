@@ -5,6 +5,14 @@ import pandas as pd
 from datetime import datetime, timedelta, timezone,time
 from zoneinfo import ZoneInfo
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import re
+
+earnings_keywords = [
+    "quarterly results", "Q1 results", "Q2 results", "Q3 results", "Q4 results", "quarterly ", 
+    "Q1 ", "Q2 ", "Q3 ", "Q4 ","Q1:", "Q2:", "Q3:", "Q4:",
+    "quarterly earnings", "net profit", "revenue", "EBITDA", "EPS", "financial results",
+    "topline", "bottomline", "Q1FY", "Q2FY", "Q3FY", "Q4FY", "fy2025", "fy25"
+]
 
 # Constants
 IST = ZoneInfo("Asia/Kolkata")
@@ -30,7 +38,7 @@ LARGE_CAP_STOCKS = [
     ]
 
 MID_CAP_STOCKS = [
-    "Aurobindo Pharma", "Bank of Baroda", "Canara Bank", "Federal Bank", "L&T Finance",
+    "Mankind","Aurobindo Pharma", "Bank of Baroda", "Canara Bank", "Federal Bank", "L&T Finance",
     "Gland Pharma", "GMR Airports", "Gujarat Gas", "Indigo (InterGlobe Aviation)",
     "Page Industries", "Mphasis", "Dixon Technologies", "Polycab", "Voltas",
     "TVS Motor", "Balkrishna Industries", "Crompton Greaves", "Biocon", "Max Financial",
@@ -165,6 +173,15 @@ def save_to_csv(news_items, filename):
         writer.writerows(news_items)
     print(f"Saved {len(news_items)} news items to {filename}")
 
+
+def very_important_news(df,date_str):
+    pattern = re.compile("|".join([re.escape(k) for k in earnings_keywords]), re.IGNORECASE)
+    df_earnings = df[df['title'].str.contains(pattern) | df['summary'].str.contains(pattern)]
+    earnings_filename = f"stock_news_earnings_{date_str}.csv"
+    df_earnings.to_csv(earnings_filename, index=False, encoding='utf-8')
+    print(f"Saved earnings-related news to {earnings_filename}")
+
+
 # Main execution
 if __name__ == "__main__":
 
@@ -173,10 +190,10 @@ if __name__ == "__main__":
     # start_dt = end_dt - timedelta(days=1)
 
     # Define dates
-    start_date = datetime(2025, 9, 1)
-    end_date = datetime(2025, 9, 2)
+    start_date = datetime(2025, 5, 21)
+    end_date = datetime(2025, 5, 22)
     # Define time of day (e.g., 09:15 AM)
-    start_time_of_day = time(15, 15)
+    start_time_of_day = time(0, 0)
     end_time_of_day = time(9, 15)
     # Combine date + time with IST timezone
     start_dt = datetime.combine(start_date, start_time_of_day, IST)
@@ -207,8 +224,10 @@ if __name__ == "__main__":
         df['published'] = pd.to_datetime(df['published'], utc=True)
         df['published'] = df['published'].dt.tz_convert(IST)
         df['published'] = df['published'].dt.strftime("%Y-%m-%d %H:%M:%S %Z")
+        
 
         date_str = end_dt.strftime("%Y%m%d_%H%M")
+        very_important_news(df,date_str)
         filename = f"stock_news_{date_str}.csv"
         df.to_csv(filename, index=False, encoding='utf-8')
         print(f"Saved news items to {filename}")
