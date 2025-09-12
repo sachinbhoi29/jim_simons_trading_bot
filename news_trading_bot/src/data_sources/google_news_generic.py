@@ -1,27 +1,19 @@
 import feedparser
 import urllib.parse
 import csv
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, time
 import pandas as pd
 from zoneinfo import ZoneInfo
-import re
 
 # Constants
 IST = ZoneInfo("Asia/Kolkata")
 
-# Static queries
-INDIA_MARKET_QUERY = (
-    '"stock market" OR "NSE" OR "BSE" OR "Sensex" OR "Nifty" OR '
-    '"RBI" OR "budget" OR "IPO" OR "SEBI"'
-)
-
-GLOBAL_MARKET_QUERY = (
-    '"stock market" OR "NSE" OR "BSE" OR "Sensex" OR "Nifty" OR "RBI" OR "budget" OR "IPO" OR "SEBI" '
-    'OR "global markets" OR "US Fed" OR "Federal Reserve" OR "crude oil" OR "OPEC" OR "geopolitical" '
-    'OR "war" OR "tariffs" OR "inflation"'
-)
-
-
+# Keywords to query separately
+ALL_QUERIES = [
+    "stock market", "NSE", "BSE", "Sensex", "Nifty", "RBI", "budget",
+    "IPO", "SEBI", "global markets", "US Fed", "Federal Reserve",
+    "crude oil", "OPEC", "geopolitical", "war", "tariffs", "inflation"
+]
 
 
 def build_rss_url(query):
@@ -36,17 +28,23 @@ def build_rss_url(query):
     return f"{base_url}?{encoded_params}"
 
 
-def fetch_news_generic(query, start_dt=None, end_dt=None):
-    if not end_dt:
-        end_dt = datetime.now(IST)
-    if not start_dt:
-        start_dt = end_dt - timedelta(days=1)
+def fetch_news_generic(keyword, start_dt, end_dt):
+    # Format date range for query
+    # if os.name == "nt":  # Windows
+    start_str = start_dt.strftime("%#d %b %Y")
+    end_str = end_dt.strftime("%#d %b %Y")
+    # else:  # Linux/Mac
+        # start_str = start_dt.strftime("%-d %b %Y")
+        # end_str = end_dt.strftime("%-d %b %Y")
+
+    # Build a more specific query
+    query = f'{keyword} news from {start_str} to {end_str}'
+    print('query',query)
+    rss_url = build_rss_url(query)
+    feed = feedparser.parse(rss_url)
 
     start_dt_utc = start_dt.astimezone(timezone.utc)
     end_dt_utc = end_dt.astimezone(timezone.utc)
-
-    rss_url = build_rss_url(query)
-    feed = feedparser.parse(rss_url)
     news_items = []
 
     for entry in feed.entries:
@@ -57,6 +55,7 @@ def fetch_news_generic(query, start_dt=None, end_dt=None):
 
         if start_dt_utc <= published_utc <= end_dt_utc:
             news_items.append({
+                "query": keyword,
                 "title": entry.title,
                 "link": entry.link,
                 "published": published_utc.isoformat(),
@@ -66,54 +65,16 @@ def fetch_news_generic(query, start_dt=None, end_dt=None):
     return news_items
 
 
-def fetch_news_for_generic_stock(start_dt=None, end_dt=None):
-    return fetch_news_generic(INDIA_MARKET_QUERY, start_dt, end_dt)
+def fetch_news_for_all_keywords(start_dt, end_dt):
+    all_news = []
+    print(f"\n📅 Fetching news from {start_dt} to {end_dt} IST\n")
 
+    for keyword in ALL_QUERIES:
+        print(f"   🔍 Querying: \"{keyword}\"")
+        news = fetch_news_generic(keyword, start_dt, end_dt)
+        all_news.extend(news)
 
-def fetch_news_for_global_category(start_dt=None, end_dt=None):
-    if not end_dt:
-        end_dt = datetime.now(IST)
-    if not start_dt:
-        start_dt = end_dt - timedelta(days=1)
-
-    start_dt_utc = start_dt.astimezone(timezone.utc)
-    end_dt_utc = end_dt.astimezone(timezone.utc)
-
-    rss_url = build_rss_url(GLOBAL_MARKET_QUERY)
-    feed = feedparser.parse(rss_url)
-    news_items = []
-
-    def categorize_news(title, summary):
-        text = f"{title} {summary}".lower()
-        if re.search(r"us fed|federal reserve|global market|opec|crude oil|inflation|geopolitical|war|tariff", text):
-            return "Global"
-        elif re.search(r"sensex|nifty|nse|bse|rbi|sebi|budget", text):
-            return "India Market"
-        elif re.search(r"ipo|earnings|profit|eps|dividend|stock split|merger|m&a|ceo", text):
-            return "Stocks/Corporate"
-        else:
-            return "Other"
-
-    for entry in feed.entries:
-        try:
-            published_utc = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
-        except Exception:
-            continue
-
-        if start_dt_utc <= published_utc <= end_dt_utc:
-            title = entry.title
-            summary = entry.get("summary", "").strip().replace('\n', ' ')
-            category = categorize_news(title, summary)
-
-            news_items.append({
-                "published": published_utc.isoformat(),
-                "title": title,
-                "category": category,
-                "summary": summary,
-                "link": entry.link,
-            })
-
-    return news_items
+    return all_news
 
 
 def save_to_csv(news_items, filename):
@@ -127,32 +88,34 @@ def save_to_csv(news_items, filename):
         dict_writer.writeheader()
         dict_writer.writerows(news_items)
 
-    print(f"Saved {len(news_items)} news items to {filename}")
+    print(f"\n✅ Saved {len(news_items)} news items to {filename}")
 
 
 # -------------------------
-# Example usage
+# Main block
 # -------------------------
 if __name__ == "__main__":
-    end_dt = datetime.now(IST)  
-    start_dt = end_dt - timedelta(days=1)
+    # Define date and time window
+    start_date = datetime(2025, 9, 10)
+    end_date = datetime(2025, 9, 11)
+    start_time = time(0, 0)
+    end_time = time(9, 15)
 
-    print(f"Fetching news from {start_dt.strftime('%Y-%m-%d %H:%M')} to {end_dt.strftime('%Y-%m-%d %H:%M')} IST")
+    # Combine with timezone
+    start_dt = datetime.combine(start_date, start_time, IST)
+    end_dt = datetime.combine(end_date, end_time, IST)
 
-    # Generic stock market news
-    news = fetch_news_for_generic_stock(start_dt, end_dt)
+    # Fetch and save news
+    all_news = fetch_news_for_all_keywords(start_dt, end_dt)
 
-    # Or fetch categorized global market news
-    # news = fetch_news_for_global_category(start_dt, end_dt)
-
-    if news:
-        df = pd.DataFrame(news)
+    if all_news:
+        df = pd.DataFrame(all_news)
         df['published'] = pd.to_datetime(df['published'], utc=True).dt.tz_convert(IST)
         df['published'] = df['published'].dt.strftime("%Y-%m-%d %H:%M:%S %Z")
 
-        date_str = end_dt.strftime("%Y%m%d_%H%M")
-        filename = f"generic_stock_news_{date_str}.csv"
+        date_str = f"{start_dt.strftime('%Y%m%d_%H%M')}_to_{end_dt.strftime('%Y%m%d_%H%M')}"
+        filename = f"news_market_combined_{date_str}.csv"
         df.to_csv(filename, index=False, encoding='utf-8')
-        print(f"Saved news items to {filename}")
+        print(f"\n📁 News saved to file: {filename}")
     else:
-        print("No news items found in selected time window.")
+        print("\n⚠️ No news items found in selected time window.")
