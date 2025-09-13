@@ -4,6 +4,7 @@ import csv
 from datetime import datetime, timedelta, timezone, time
 import pandas as pd
 from zoneinfo import ZoneInfo
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Constants
 IST = ZoneInfo("Asia/Kolkata")
@@ -26,6 +27,28 @@ def build_rss_url(query):
     }
     encoded_params = urllib.parse.urlencode(params)
     return f"{base_url}?{encoded_params}"
+
+
+
+
+def fetch_news_for_all_keywords(start_dt, end_dt):
+    all_news = []
+    print(f"\n📅 Fetching news from {start_dt} to {end_dt} IST in parallel...\n")
+
+    def task(keyword):
+        print(f"   🔍 Querying: \"{keyword}\"")
+        return fetch_news_generic(keyword, start_dt, end_dt)
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(task, keyword): keyword for keyword in ALL_QUERIES}
+        for future in as_completed(futures):
+            try:
+                news = future.result()
+                all_news.extend(news)
+            except Exception as e:
+                print(f"⚠️ Error fetching news for '{futures[future]}': {e}")
+
+    return all_news
 
 
 def fetch_news_generic(keyword, start_dt, end_dt):
@@ -65,18 +88,6 @@ def fetch_news_generic(keyword, start_dt, end_dt):
     return news_items
 
 
-def fetch_news_for_all_keywords(start_dt, end_dt):
-    all_news = []
-    print(f"\n📅 Fetching news from {start_dt} to {end_dt} IST\n")
-
-    for keyword in ALL_QUERIES:
-        print(f"   🔍 Querying: \"{keyword}\"")
-        news = fetch_news_generic(keyword, start_dt, end_dt)
-        all_news.extend(news)
-
-    return all_news
-
-
 def save_to_csv(news_items, filename):
     if not news_items:
         print("No news to save.")
@@ -96,8 +107,8 @@ def save_to_csv(news_items, filename):
 # -------------------------
 if __name__ == "__main__":
     # Define date and time window
-    start_date = datetime(2025, 9, 5)
-    end_date = datetime(2025, 9, 8)
+    start_date = datetime(2025, 8, 20)
+    end_date = datetime(2025, 8, 21)
     start_time = time(15, 15)
     end_time = time(9, 15)
 
