@@ -96,8 +96,8 @@ def save_to_csv(news_items, filename):
 # -------------------------
 if __name__ == "__main__":
     # Define date and time window
-    start_date = datetime(2025, 9, 11)
-    end_date = datetime(2025, 9, 12)
+    start_date = datetime(2025, 9, 5)
+    end_date = datetime(2025, 9, 8)
     start_time = time(15, 15)
     end_time = time(9, 15)
 

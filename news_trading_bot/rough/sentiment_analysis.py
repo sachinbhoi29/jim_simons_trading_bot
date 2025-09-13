@@ -1,6 +1,3 @@
-# Install required packages (if not already installed)
-# pip install pandas transformers torch
-
 import pandas as pd
 import re
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -11,8 +8,7 @@ import numpy as np
 # Step 1: Load and Clean Data
 # ------------------------------
 
-# Load your CSV file here
-df = pd.read_csv("news_market_combined_20250911_1515_to_20250912_0915.csv")  # Make sure it has 'query' and 'title' columns
+df = pd.read_csv("news_market_combined_20250905_1515_to_20250908_0915.csv")
 
 def clean_text(text):
     text = re.sub(r'[^\w\s]', '', str(text))
@@ -23,18 +19,28 @@ def clean_text(text):
 df['clean_title'] = df['title'].apply(clean_text)
 
 # ------------------------------
-# Step 2: Load FinBERT
+# Step 2: Load Improved Model
 # ------------------------------
 
-tokenizer = AutoTokenizer.from_pretrained("ProsusAI/finbert")
-model = AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert")
+MODEL_NAME = "cardiffnlp/twitter-roberta-base-sentiment"
+
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
 model.eval()
+
+# Sentiment mapping
+label_map = {
+    "LABEL_0": -1,   # Negative
+    "LABEL_1": 0,    # Neutral
+    "LABEL_2": 1     # Positive
+}
 
 def get_sentiment_score(text):
     tokens = tokenizer(text, return_tensors='pt', truncation=True, padding=True)
     with torch.no_grad():
         output = model(**tokens)
         probs = torch.nn.functional.softmax(output.logits, dim=1).numpy()[0]
+        label = np.argmax(probs)
         sentiment_score = (probs[2] - probs[0]) * 100  # Positive - Negative
         return round(sentiment_score, 2)
 
