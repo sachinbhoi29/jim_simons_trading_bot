@@ -1,63 +1,57 @@
-# trading_bot.py
-import config
-from data.data_handler import DataHandler
-from models.market_regime_detector import MarketRegimeDetector
-from stock_selection.stock_selector import StockSelector
-from strategies.strategy_executor import StrategyExecutor
-from backtesting.backtester import Backtester
-from execution.executor import Executor
-from visualization.visualizer import Visualizer
+from data_handler.data_handler import DataHandler
+from regimes.market_regime_detector import MarketRegimeDetector
+from regimes.markov_chain_and_ml import MarketRegimeForecaster
+from features_calculations.indicators_base_class import IndicatorBase
+from features_calculations.price_action_base_class import PriceActionBase
+import pandas as pd
+from utils.common_functions import merge_stock_with_nifty_regime,normalize_ohlcv_columns
 
-class TradingBot:
+
+stock_to_analyze = 'data/TCS_3yr_daily.csv'
+class pilotPipeline:
     def __init__(self):
-        self.config = config.load_config()
-        self.data_handler = DataHandler()
-        self.regime_detector = MarketRegimeDetector()
-        self.stock_selector = StockSelector()
-        self.strategy_executor = StrategyExecutor()
-        self.backtester = Backtester()
-        self.executor = Executor()
-        self.visualizer = Visualizer()
+        pass
+    
+    def get_data(self):  # Sadly my IP is blocked by yfinance, and I have no idea why
+        print("Part 1: Regime Detection")
+        print("Step 1: Getting data from Yahoo Finance...")
+        handler = DataHandler()
+        stock_data = handler.load_data()        
+        return stock_data
+    
+    def regime_detector(self):
+        print("Step 2: Detecting market regimes from NIFTY50...")
+        detector = MarketRegimeDetector(file_path="data/NIFTY50_1d_5y.csv")
+        self.regimes_df = detector.run_regime_detector()
+        
 
-    def run(self):
-        """Main function to run the trading bot."""
-        self.update_data()
-        market_regime = self.detect_market_regime()
-        selected_stocks = self.select_stocks(market_regime)
-        strategy = self.select_strategy(market_regime)
-        self.execute_strategy(strategy, selected_stocks)
+    def markvo_chain(self):
+        print("Step 3: Forecasting future market regimes...")
+        print("!!! Remember you cannot rely on the forecasted regimes")
+        forecaster = MarketRegimeForecaster(regimes_df = self.regimes_df,combined_actual_and_forecast_file_name="combined_actual_and_forecast.csv")
+        self.nifty_combined_actual_and_forecast_df = forecaster.run_forecast_pipeline()
+    
+    def indicators_calculation(self,stock_df= None):
+        print("Part 2: Stock Feature Calculations")
+        print("Step 4: Calculating technical indicators for the stocks...")
+        stock_df = pd.read_csv(stock_to_analyze)
+        stock_df = normalize_ohlcv_columns(stock_df)
+        if stock_df.empty:
+            print("Error: stock_df is empty. Please provide a valid DataFrame.")
+            return
+        indicators = IndicatorBase(stock_df)
+        self.df_indicators = indicators.compute_indicators()
 
-    def update_data(self):
-        """Fetches market data and updates databases."""
-        self.data_handler.fetch_data()
+    def price_action(self,df_indicators=None):
+        print("Step 5: Analyzing price actions...")
+        pa = PriceActionBase(self.df_indicators)
+        self.df_stock_indicators_and_price_action = pa.compute_candlestick_patterns()
+        self.df_stock_indicators_and_price_action = pa.compute_support_resistance(window=20)
+        self.df_stock_indicators_and_price_action = pa.compute_context_flags(tolerance=0.015)
+        return self.df_stock_indicators_and_price_action
 
-    def detect_market_regime(self):
-        """Detects the current market regime."""
-        return self.regime_detector.predict_regime()
-
-    def select_stocks(self, market_regime):
-        """Filters stocks based on the detected market regime."""
-        return self.stock_selector.select_stocks(market_regime)
-
-    def select_strategy(self, market_regime):
-        """Selects the best strategy for the current regime."""
-        return self.strategy_executor.select_strategy(market_regime)
-
-    def execute_strategy(self, strategy, selected_stocks):
-        """Executes the selected trading strategy."""
-        self.strategy_executor.execute(strategy, selected_stocks)
-
-    def backtest_strategies(self):
-        """Backtests all strategies."""
-        self.backtester.run_backtest()
-
-    def visualize_results(self):
-        """Generates charts for analysis."""
-        self.visualizer.plot_regime()
-        self.visualizer.plot_stock_performance()
-        self.visualizer.plot_backtest_results()
-
-if __name__ == "__main__":
-    bot = TradingBot()
-    bot.run()
-
+    def merge_stock_with_nifty_regime(self):
+        print("Part 3: Merging Data")
+        print("Step 6: Merging stock data with NIFTY50 regime data...")
+        self.df_stock_regime = merge_stock_with_nifty_regime(self.df_stock_indicators_and_price_action, self.nifty_combined_actual_and_forecast_df)
+        return self.df_stock_regime

@@ -1,0 +1,7 @@
+We are detecting regimes and then applying best strategy as jim simons did
+
+
+What if we use brutforce approach
+what if I calculate 100 indicators and when 80-85 indicators are bullish then I buy?
+VS
+use the best indicators according to regimes
