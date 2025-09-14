@@ -5,3 +5,7 @@ What if we use brutforce approach
 what if I calculate 100 indicators and when 80-85 indicators are bullish then I buy?
 VS
 use the best indicators according to regimes
+
+
+I have news sentiment analysis, now, what I want is, news sentiment change over time, to detect how the news are chaning
+only that part is pending from the indicators side

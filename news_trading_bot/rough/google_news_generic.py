@@ -29,7 +29,7 @@ GENERIC = [
     "crude oil", "OPEC", "geopolitical", "war", "tariffs", "inflation"]
 
 # Keywords to query separately
-ALL_QUERIES =  GENERIC + BANKNIFTY
+ALL_QUERIES =  GENERIC + NIFTY50
 
 
 def build_rss_url(query):
