@@ -9,7 +9,7 @@ import re
 
 earnings_keywords = [
     "quarterly results", "Q1 results", "Q2 results", "Q3 results", "Q4 results", "quarterly ", 
-    "Q1 ", "Q2 ", "Q3 ", "Q4 ","Q1:", "Q2:", "Q3:", "Q4:",
+    "Q1 ", "Q2 ", "Q3 ", "Q4 ","Q1:", "Q2:", "Q3:", "Q4:",'profit','profits','loss','losses'
     "quarterly earnings", "net profit", "revenue", "EBITDA", "EPS", "financial results",
     "topline", "bottomline", "Q1FY", "Q2FY", "Q3FY", "Q4FY", "fy2025", "fy25"
 ]
@@ -174,12 +174,31 @@ def save_to_csv(news_items, filename):
     print(f"Saved {len(news_items)} news items to {filename}")
 
 
-def very_important_news(df,date_str):
-    pattern = re.compile("|".join([re.escape(k) for k in earnings_keywords]), re.IGNORECASE)
-    df_earnings = df[df['title'].str.contains(pattern) | df['summary'].str.contains(pattern)]
-    earnings_filename = f"stock_news_earnings_{date_str}.csv"
-    df_earnings.to_csv(earnings_filename, index=False, encoding='utf-8')
-    print(f"Saved earnings-related news to {earnings_filename}")
+# def very_important_news(df,date_str):
+#     pattern = re.compile("|".join([re.escape(k) for k in earnings_keywords]), re.IGNORECASE)
+#     df_earnings = df[df['title'].str.contains(pattern) | df['summary'].str.contains(pattern)]
+#     earnings_filename = f"stock_news_earnings_{date_str}.csv"
+#     df_earnings.to_csv(earnings_filename, index=False, encoding='utf-8')
+#     print(f"Saved earnings-related news to {earnings_filename}")
+
+
+def categorize_news(df, keywords):
+    """
+    Adds a 'category' column to the DataFrame based on matching keywords in title/summary.
+    If no keyword matches, assigns 'general'.
+    """
+    # Pre-compile regex for performance
+    keyword_pattern = re.compile("|".join([re.escape(k) for k in keywords]), re.IGNORECASE)
+
+    def get_category(row):
+        text = f"{row['title']} {row['summary']}"
+        match = keyword_pattern.search(text)
+        if match:
+            return match.group(0)  # return the keyword that matched
+        return "general"
+
+    df["category"] = df.apply(get_category, axis=1)
+    return df
 
 
 # Main execution
@@ -190,8 +209,8 @@ if __name__ == "__main__":
     # start_dt = end_dt - timedelta(days=1)
 
     # Define dates
-    start_date = datetime(2025, 9, 11)
-    end_date = datetime(2025, 9, 12)
+    start_date = datetime(2025, 9, 12)
+    end_date = datetime(2025, 9, 15)
     # Define time of day (e.g., 09:15 AM)
     start_time_of_day = time(3, 15)
     end_time_of_day = time(9, 15)
@@ -227,7 +246,7 @@ if __name__ == "__main__":
         
 
         date_str = end_dt.strftime("%Y%m%d_%H%M")
-        very_important_news(df,date_str)
+        categorize_news(df,earnings_keywords)
         filename = f"stock_news_{date_str}.csv"
         df.to_csv(filename, index=False, encoding='utf-8')
         print(f"Saved news items to {filename}")

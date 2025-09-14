@@ -4,16 +4,32 @@ import csv
 from datetime import datetime, timedelta, timezone, time
 import pandas as pd
 from zoneinfo import ZoneInfo
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Constants
 IST = ZoneInfo("Asia/Kolkata")
 
-# Keywords to query separately
-ALL_QUERIES = [
+NIFTY50 = [
+    "Adani Enterprises", "Adani Ports", "Apollo Hospitals", "Asian Paints", "Axis Bank", 
+    "Bajaj Auto", "Bajaj Finance", "Bajaj Finserv", "BPCL", "Bharti Airtel", "Britannia", 
+    "Cipla", "Coal India", "Divi's Labs", "Dr Reddy's", "Eicher Motors", "Grasim", 
+    "HCL Tech", "HDFC Bank", "HDFC Life", "Hero MotoCorp", "Hindalco", "HUL", "ICICI Bank", 
+    "ITC", "IndusInd Bank", "Infosys", "JSW Steel", "Kotak Bank", "L&T", "LTIMindtree", 
+    "M&M", "Maruti Suzuki", "Nestle India", "NTPC", "ONGC", "Power Grid", "Reliance", 
+    "SBI", "SBI Life", "Sun Pharma", "TCS", "Tech Mahindra", "Tata Consumer", 
+    "Tata Motors", "Tata Steel", "Titan", "UPL", "UltraTech Cement", "Wipro"]
+
+BANKNIFTY = ["Axis Bank", "Bandhan Bank", "Bank of Baroda", "Federal Bank", "HDFC Bank",
+    "ICICI Bank", "IDFC First Bank", "IndusInd Bank", "Kotak Mahindra Bank",
+    "Punjab National Bank", "State Bank of India", "AU Small Finance Bank"]
+
+GENERIC = [
     "stock market", "NSE", "BSE", "Sensex", "Nifty", "RBI", "budget",
     "IPO", "SEBI", "global markets", "US Fed", "Federal Reserve",
-    "crude oil", "OPEC", "geopolitical", "war", "tariffs", "inflation"
-]
+    "crude oil", "OPEC", "geopolitical", "war", "tariffs", "inflation"]
+
+# Keywords to query separately
+ALL_QUERIES =  GENERIC + NIFTY50
 
 
 def build_rss_url(query):
@@ -65,14 +81,33 @@ def fetch_news_generic(keyword, start_dt, end_dt):
     return news_items
 
 
+# def fetch_news_for_all_keywords(start_dt, end_dt):
+#     all_news = []
+#     print(f"\n📅 Fetching news from {start_dt} to {end_dt} IST\n")
+
+#     for keyword in ALL_QUERIES:
+#         print(f"   🔍 Querying: \"{keyword}\"")
+#         news = fetch_news_generic(keyword, start_dt, end_dt)
+#         all_news.extend(news)
+
+#     return all_news
+
 def fetch_news_for_all_keywords(start_dt, end_dt):
     all_news = []
-    print(f"\n📅 Fetching news from {start_dt} to {end_dt} IST\n")
+    print(f"\n📅 Fetching news from {start_dt} to {end_dt} IST in parallel...\n")
 
-    for keyword in ALL_QUERIES:
+    def task(keyword):
         print(f"   🔍 Querying: \"{keyword}\"")
-        news = fetch_news_generic(keyword, start_dt, end_dt)
-        all_news.extend(news)
+        return fetch_news_generic(keyword, start_dt, end_dt)
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(task, keyword): keyword for keyword in ALL_QUERIES}
+        for future in as_completed(futures):
+            try:
+                news = future.result()
+                all_news.extend(news)
+            except Exception as e:
+                print(f"⚠️ Error fetching news for '{futures[future]}': {e}")
 
     return all_news
 
@@ -96,8 +131,8 @@ def save_to_csv(news_items, filename):
 # -------------------------
 if __name__ == "__main__":
     # Define date and time window
-    start_date = datetime(2025, 9, 5)
-    end_date = datetime(2025, 9, 8)
+    start_date = datetime(2025, 9, 11)
+    end_date = datetime(2025, 9, 12)
     start_time = time(15, 15)
     end_time = time(9, 15)
 
