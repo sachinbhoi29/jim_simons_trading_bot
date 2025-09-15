@@ -7,6 +7,10 @@ from zoneinfo import ZoneInfo
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import re
 
+
+# Constants
+IST = ZoneInfo("Asia/Kolkata")
+
 earnings_keywords = [
     "quarterly results", "Q1 results", "Q2 results", "Q3 results", "Q4 results", "quarterly ", 
     "Q1 ", "Q2 ", "Q3 ", "Q4 ",
@@ -14,8 +18,7 @@ earnings_keywords = [
     "topline", "bottomline", "Q1FY", "Q2FY", "Q3FY", "Q4FY", "fy2025", "fy25"
 ]
 
-# Constants
-IST = ZoneInfo("Asia/Kolkata")
+
 # Sample list of 10 NSE stock names\
 LARGE_CAP_STOCKS = [
     "Reliance", "TCS", "HDFC Bank", "Infosys", "ICICI Bank", "Hindustan Unilever",

@@ -9,3 +9,5 @@ use the best indicators according to regimes
 
 I have news sentiment analysis, now, what I want is, news sentiment change over time, to detect how the news are chaning
 only that part is pending from the indicators side
+
+combine both NIFTY and BANKNIFTY
