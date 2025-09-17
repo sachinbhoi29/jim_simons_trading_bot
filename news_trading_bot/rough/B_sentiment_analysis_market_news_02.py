@@ -8,7 +8,7 @@ import numpy as np
 # Step 1: Load and Clean Data
 # ------------------------------
 
-df = pd.read_csv("news_market_combined_20250912_1515_to_20250915_0915.csv")
+df = pd.read_csv("news_market_combined_20250916_1515_to_20250917_0915.csv")
 
 def clean_text(text):
     text = re.sub(r'[^\w\s]', '', str(text))
