@@ -30,7 +30,8 @@ GENERIC = [
 
 # Keywords to query separately
 ALL_QUERIES =  GENERIC + BANKNIFTY
-
+# ALL_QUERIES =  BANKNIFTY
+# ALL_QUERIES =  NIFTY50
 
 def build_rss_url(query):
     base_url = "https://news.google.com/rss/search"
@@ -131,8 +132,8 @@ def save_to_csv(news_items, filename):
 # -------------------------
 if __name__ == "__main__":
     # Define date and time window
-    start_date = datetime(2025, 9, 12)
-    end_date = datetime(2025, 9, 15)
+    start_date = datetime(2025, 9, 16)
+    end_date = datetime(2025, 9, 17)
     start_time = time(15, 15)
     end_time = time(9, 15)
 
