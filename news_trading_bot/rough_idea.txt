@@ -1,3 +1,0 @@
-I want to do news trading. but for that I want a clear plan. 
-I want to know what is the sentiment of the global market. 
-Then I want a custom NLP, what I mean is i want the source of the earings, the first source, where the quarterly earnings appear, like the NSE, I want announcements data from there, so I will be super fast to react secondly, I want market sentiment. Then I want the international sentiment. Then I want to google search for specific stock + news, and get the top headlines, here general NLP will apply but I want custom NLP to apply to earnings, dividends, etc, all those reports so prepare a proper outlinem or the index for word document then we can explore
