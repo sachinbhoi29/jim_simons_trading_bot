@@ -1,0 +1,29 @@
+We will have a feature branch
+new feature will be developed in that branch
+the lifecycle of that feature starts from the dev, then uat and then prod
+once the feature is finalized, and tested, only then it can go to the main code
+
+So, each feature will have it's own branch and it will be created in feature folder
+example:- features/news-trading/dev/, uat/,prod
+
+dev:
+all development work will be in dev
+
+uat:
+once you think this code is working and good, it will be moved to uat
+
+prod:
+This is the code which actually has value in the product. so, any code which will bring value to the product, will come 
+here. and it will go to main code.
+For example there is some working code but is not useful, it will stay in UAT
+
+File naming conventions:
+
+while development, give the files A, B, C onwards name for same category
+and each step, can be given _1,_2,_3 name
+For eample: there is market generic news and stocks news, so market news file name can start with A, and stocks can start with B
+or maintain seperate folder
+and steps, like step 1 and 2 will have _1 and _2 at the end
+
+use snake case for class names
+use all caps for constant
