@@ -1,6 +1,7 @@
-import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+
+
 
 class BaseOverlay:
     def plot(self, ax, df):
@@ -264,3 +265,6 @@ class FibonacciOverlay(BaseOverlay):
         # Label slightly above/right of the star for space
         y_offset = (df["High"].max() - df["Low"].min()) * 0.01  # 1% of price range
         ax.text(x_pos, last_close + y_offset, f" {closest_level}", color='black', fontsize=9, va="bottom", ha="center")
+
+
+
