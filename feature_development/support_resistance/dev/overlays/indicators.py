@@ -1,4 +1,6 @@
-
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
 class BaseOverlay:
     def plot(self, ax, df):
@@ -166,3 +168,99 @@ class ATROverlay(BaseOverlay):
         df = self.compute(df)
         if self.show:
             ax.plot(df.index, df[f"ATR_{self.window}"], label=f"ATR({self.window})", color=self.color)
+
+class FibonacciOverlay(BaseOverlay):
+    def __init__(self, lookback=100, levels=None, colors=None, linestyles=None, show=True):
+        self.lookback = lookback
+        self.levels = levels if levels is not None else [0.0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0]
+        self.show = show
+
+        self.colors = colors if colors is not None else plt.cm.viridis(np.linspace(0, 1, len(self.levels)))
+        self.linestyles = linestyles if linestyles is not None else ["--"] * len(self.levels)
+
+        # These will be cached after compute
+        self.levels_dict = {}
+        self.x1 = None
+        self.x2 = None
+
+    def compute(self, df):
+        if df.empty or len(df) < self.lookback:
+            return df
+
+        df = df.copy()
+        recent_df = df.iloc[-self.lookback:]
+
+        swing_high_idx = recent_df["High"].idxmax()
+        swing_low_idx = recent_df["Low"].idxmin()
+        swing_high = df.loc[swing_high_idx, "High"]
+        swing_low = df.loc[swing_low_idx, "Low"]
+
+        if swing_low_idx > swing_high_idx:
+            swing_low_idx, swing_high_idx = swing_high_idx, swing_low_idx
+            swing_low, swing_high = swing_high, swing_low
+
+        self.x1 = swing_low_idx
+        self.x2 = swing_high_idx
+
+        # Fibonacci levels
+        self.levels_dict = {}
+        for level in self.levels:
+            price = swing_high - (swing_high - swing_low) * level
+            self.levels_dict[f"{int(level * 100)}%"] = price
+
+        # Last close analysis
+        last_close = df["Close"].iloc[-1]
+        distances = {k: abs(last_close - v) for k, v in self.levels_dict.items()}
+        closest_level = min(distances, key=distances.get)
+        closest_price = self.levels_dict[closest_level]
+        percent_diff = 100 * (last_close - closest_price) / closest_price
+
+        # Determine status
+        if last_close < closest_price:
+            self.fibo_status = "approaching"
+        elif last_close > closest_price:
+            # Check if it has crossed previously
+            crossed_before = any(df["Close"].iloc[:-1] > closest_price)
+            self.fibo_status = "crossed then approaching" if crossed_before else "crossed"
+        else:
+            self.fibo_status = "at level"
+
+        # Store results in overlay object
+        self.fibo_nearest_level = closest_level
+        self.fibo_close_percent = round(percent_diff, 2)
+        self.fibo_actual_level = closest_price
+
+        # Store in DataFrame
+        df.loc[df.index[-1], "Fibo_Nearest_Level"] = closest_level
+        df.loc[df.index[-1], "Fibo_Percent_Offset"] = self.fibo_close_percent
+        df.loc[df.index[-1], "Fibo_Status_Last_Close"] = self.fibo_status
+
+        # Store all levels for reference
+        for label, price in self.levels_dict.items():
+            df.loc[df.index[-1], f"Fib_{label}"] = price
+
+        return df
+
+    def plot(self, ax, df):
+        if not self.show or not self.levels_dict or self.x1 is None or self.x2 is None:
+            return
+
+        # Plot Fibonacci levels
+        for i, (label, price) in enumerate(self.levels_dict.items()):
+            color = self.colors[i % len(self.colors)]
+            linestyle = self.linestyles[i % len(self.linestyles)]
+            ax.plot([self.x1, self.x2], [price, price], color=color, linestyle=linestyle, label=f"{label} - {price:.2f}")
+            ax.text(self.x2, price, f"{label}: {price:.2f}", color=color, fontsize=8, ha="left", va="center")
+
+        # Last close as a star
+        last_close = df["Close"].iloc[-1]
+        distances = {k: abs(last_close - v) for k, v in self.levels_dict.items()}
+        closest_level = min(distances, key=distances.get)
+
+        # Place star right above the last candle
+        x_pos = df.index[-1]  # last candle
+        ax.scatter(x_pos, last_close, marker='*', color='black', s=100, zorder=5)
+
+        # Label slightly above/right of the star for space
+        y_offset = (df["High"].max() - df["Low"].min()) * 0.01  # 1% of price range
+        ax.text(x_pos, last_close + y_offset, f" {closest_level}", color='black', fontsize=9, va="bottom", ha="center")
