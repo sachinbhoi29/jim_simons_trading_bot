@@ -7,16 +7,36 @@ from screeninfo import get_monitors
 
 
 class CandlestickChart:
-    def __init__(self, df, ticker="Ticker", dpi=100, show_candles=True):
+    def __init__(self, df, ticker="Ticker", dpi=100, show_candles=True, show=True):
         self.df = df
         self.ticker = ticker
         self.dpi = dpi
         self.show_candles = show_candles
         self.overlays = []
         self.subplots = []  # Stores (overlay, height_ratio)
+        self.show = show
 
     def add_overlay(self, overlay):
         self.overlays.append(overlay)
+
+    def only_df(self):
+        """
+        Compute all overlays/subplots and return the enriched DataFrame,
+        without plotting anything.
+        """
+        df = self.df.copy()
+
+        # overlays
+        for overlay in self.overlays:
+            if hasattr(overlay, "compute"):  # overlays should implement compute(df)
+                df = overlay.compute(df)
+
+        # subplots
+        for overlay, _ in self.subplots:
+            if hasattr(overlay, "compute"):
+                df = overlay.compute(df)
+
+        return df
 
     def add_subplot(self, overlay, height_ratio=1):
         self.subplots.append((overlay, height_ratio))
@@ -25,6 +45,9 @@ class CandlestickChart:
         df = self.df.reset_index()
         df['Date'] = df['Date'].map(mdates.date2num)
         ohlc = df[['Date', 'Open', 'High', 'Low', 'Close']].values
+
+        if not self.show:
+            return df  # return only data
 
         # Plot config
         height_ratios = [4] + [r for _, r in self.subplots]
