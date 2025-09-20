@@ -3,7 +3,7 @@
 import yfinance as yf
 from candlestick_chart import CandlestickChart
 from overlays.support_resistance import SupportResistanceZones
-from overlays.indicators import MovingAverageOverlay
+from overlays.indicators import MovingAverageOverlay, RSIOverlay
 from overlays.zigzag import Zigzag
 
 
@@ -15,6 +15,7 @@ if __name__ == "__main__":
     chart.add_overlay(SupportResistanceZones())
     chart.add_overlay(MovingAverageOverlay(window=20, color="blue"))
     chart.add_overlay(MovingAverageOverlay(window=50, color="red"))
+    chart.add_subplot(RSIOverlay(period=14), height_ratio=1)
     chart.add_overlay(Zigzag())
     chart.plot()
 

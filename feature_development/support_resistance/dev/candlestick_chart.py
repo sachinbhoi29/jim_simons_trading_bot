@@ -13,35 +13,59 @@ class CandlestickChart:
         self.dpi = dpi
         self.show_candles = show_candles
         self.overlays = []
+        self.subplots = []  # Stores (overlay, height_ratio)
 
     def add_overlay(self, overlay):
         self.overlays.append(overlay)
+
+    def add_subplot(self, overlay, height_ratio=1):
+        self.subplots.append((overlay, height_ratio))
 
     def plot(self):
         df = self.df.reset_index()
         df['Date'] = df['Date'].map(mdates.date2num)
         ohlc = df[['Date', 'Open', 'High', 'Low', 'Close']].values
 
-        # Fullscreen figure
-        monitor = get_monitors()[0]
-        width_in = monitor.width / self.dpi
-        height_in = monitor.height / self.dpi
-        fig, ax = plt.subplots(figsize=(width_in, height_in), dpi=self.dpi)
+        # Plot config
+        height_ratios = [4] + [r for _, r in self.subplots]
+        total_ratio = sum(height_ratios)
+        base_height = 6  # main chart height
+        height_in = base_height * total_ratio / 4
+        width_in = 16  # good default width
 
+        fig, axs = plt.subplots(
+            len(height_ratios), 1, sharex=True,
+            figsize=(width_in, height_in), dpi=self.dpi,
+            gridspec_kw={"height_ratios": height_ratios}
+        )
+
+        if len(height_ratios) == 1:
+            axs = [axs]
+
+        ax_main = axs[0]
         if self.show_candles:
-            candlestick_ohlc(ax, ohlc, width=0.6, colorup='green', colordown='red', alpha=0.8)
-
-        ax.xaxis_date()
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-        plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
-        plt.subplots_adjust(bottom=0.2)
+            candlestick_ohlc(ax_main, ohlc, width=0.6, colorup='green', colordown='red', alpha=0.8)
 
         for overlay in self.overlays:
-            overlay.plot(ax, self.df)
+            overlay.plot(ax_main, self.df)
 
-        ax.set_title(f"{self.ticker} - Candlestick Chart", fontsize=20)
-        ax.set_xlabel("Date")
-        ax.set_ylabel("Price")
-        ax.grid(True)
-        ax.legend()
+        ax_main.xaxis_date()
+        ax_main.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+        ax_main.set_title(f"{self.ticker} - Candlestick Chart", fontsize=20)
+        ax_main.set_ylabel("Price")
+        ax_main.grid(True)
+        ax_main.legend()
+        plt.setp(ax_main.get_xticklabels(), rotation=45, ha="right")
+        plt.subplots_adjust(bottom=0.15)
+
+        # Subplots
+        for i, (overlay, _) in enumerate(self.subplots):
+            ax = axs[i + 1]
+            overlay.plot(ax, self.df)
+            ax.grid(True)
+            ax.legend()
+
+        plt.tight_layout()
         plt.show()
+
+
