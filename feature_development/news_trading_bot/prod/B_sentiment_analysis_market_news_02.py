@@ -8,7 +8,7 @@ import numpy as np
 # Step 1: Load and Clean Data
 # ------------------------------
 
-df = pd.read_csv("news_market_combined_20250916_1515_to_20250917_0915.csv")
+df = pd.read_csv("feature_development/news_trading_bot/prod/news_market_combined_20250919_1515_to_20250922_0915.csv")
 
 def clean_text(text):
     text = re.sub(r'[^\w\s]', '', str(text))
@@ -100,4 +100,4 @@ print(f"\n📊 Market Sentiment Index: {overall_index} → {overall_sentiment}")
 # Step 5: Save Results (Optional)
 # ------------------------------
 
-df.to_csv("news_sentiment_scored.csv", index=False)
+df.to_csv("feature_development/news_trading_bot/prod/news_sentiment_scored.csv", index=False)
