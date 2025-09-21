@@ -196,10 +196,10 @@ df = pd.read_csv("feature_development/options/dev/NIFTY_options_07Oct2025.csv")
 strategy = OptionStrategy(df)
 
 # Add legs
-strategy.add_leg('C', 'SELL', 25450)   # Buy Put 23000
-strategy.add_leg('P', 'SELL', 25250)   # Buy Put 23000
-strategy.add_leg('C', 'BUY', 25550)   # Buy Call 23000
-strategy.add_leg('P', 'BUY', 25150)   # Buy Call 23000
+strategy.add_leg('C', 'BUY', 25000)   # Buy Call 23000
+strategy.add_leg('C', 'SELL', 25500)   # Buy Put 23000
+# strategy.add_leg('P', 'BUY', 25150)   # Buy Call 23000
+# strategy.add_leg('P', 'SELL', 25250)   # Buy Put 23000
 
 # Show legs
 strategy.show_strategy()
