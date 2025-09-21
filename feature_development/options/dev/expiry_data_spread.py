@@ -189,7 +189,7 @@ def fetch_nifty_options(csv_file_path, save_dir="feature_development/options/dev
     return csv_file, excel_file
 
 
-# ---------------- Run ----------------
+# ---------------- Run ---------------
 if __name__ == "__main__":
     csv_file = "feature_development/options/dev/NIFTY_optionchain_raw.csv"  # your raw CSV file
     csv_path, excel_path = fetch_nifty_options(csv_file_path=csv_file)
