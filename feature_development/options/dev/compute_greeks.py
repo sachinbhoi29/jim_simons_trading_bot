@@ -1,4 +1,5 @@
 # compute_greeks.py
+# greeks calculation, I am not sure if it is right
 import os
 from datetime import datetime
 import numpy as np
