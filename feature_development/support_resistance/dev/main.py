@@ -1,11 +1,11 @@
 # main.py
 
 import yfinance as yf
-from candlestick_chart import CandlestickChart
-from overlays.indicators import MovingAverageOverlay, RSIOverlay,VolumeOverlay,MACDOverlay,BollingerBandsOverlay,StochasticOscillatorOverlay,ATROverlay,EMAOverlay,FibonacciOverlay
+from candlestick_chart_v1 import CandlestickChart
+from overlays.indicators_v1 import MovingAverageOverlay, RSIOverlay,VolumeOverlay,MACDOverlay,BollingerBandsOverlay,StochasticOscillatorOverlay,ATROverlay,EMAOverlay,FibonacciOverlay
 # from overlays.support_resistance import SupportResistanceZones # added in zigzagsr
-from overlays.zigzagsr import ZigzagSR
-from overlays.regime_detection import EnhancedRegimeOverlay
+from overlays.zigzagsr_v1 import ZigzagSR
+from overlays.regime_detection_v1 import EnhancedRegimeOverlay
 
 
 if __name__ == "__main__":
