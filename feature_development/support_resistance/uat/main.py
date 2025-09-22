@@ -1,9 +1,9 @@
 # main.py
 
 import yfinance as yf
-from candlestick_chart import CandlestickChart
-from overlays.indicators import MovingAverageOverlay, RSIOverlay,VolumeOverlay,MACDOverlay,BollingerBandsOverlay,StochasticOscillatorOverlay,ATROverlay,EMAOverlay,FibonacciOverlay
-from overlays.zigzagsr import ZigzagSR
+from candlestick_chart_v1 import CandlestickChart
+from overlays.indicators_v1 import MovingAverageOverlay, RSIOverlay,VolumeOverlay,MACDOverlay,BollingerBandsOverlay,StochasticOscillatorOverlay,ATROverlay,EMAOverlay,FibonacciOverlay
+from overlays.zigzagsr_v1 import ZigzagSR
 
 
 if __name__ == "__main__":
