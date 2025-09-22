@@ -3,7 +3,6 @@ import numpy as np
 import pandas_ta as ta
 
 
-
 class IndicatorBase:
     def __init__(self, df: pd.DataFrame):
         """
