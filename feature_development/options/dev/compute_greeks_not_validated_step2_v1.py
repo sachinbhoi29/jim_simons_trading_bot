@@ -127,7 +127,7 @@ def add_greeks_to_csv(
     # compute T (time to expiry in years)
     today = datetime.now().date()
     days_to_expiry = (chosen_expiry - today).days
-    if days_to_expiry <= 0:
+    if days_to_expiry < 0:
         raise ValueError(f"Expiry {chosen_expiry} is today or in the past.")
     T = days_to_expiry / 365.0
 
@@ -318,5 +318,5 @@ def add_greeks_to_csv(
     return output_csv, output_excel
 
 # Example usage:
-csv_out, xlsx_out = add_greeks_to_csv("feature_development/options/dev/NIFTY_options_07Oct2025.csv")
+csv_out, xlsx_out = add_greeks_to_csv("feature_development/options/dev/NIFTY_options_30Sep2025.csv")
 # print("Saved:", csv_out, xlsx_out)

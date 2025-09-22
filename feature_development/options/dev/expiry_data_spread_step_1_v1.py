@@ -22,13 +22,21 @@ def fetch_nifty_options(csv_file_path, save_dir="feature_development/options/dev
     print(f"Reading option chain from {csv_file_path}...")
     df_raw = pd.read_csv(csv_file_path)
 
-    # Convert string to datetime just for sorting/comparison
-    expiry_dates_dt = [datetime.datetime.strptime(d, "%d-%b-%Y") for d in df_raw["expiryDate"].unique()]
-    today = datetime.datetime.today()
+    # Convert strings to datetime.date
+    def parse_expiry(d):
+        d = str(d).strip()  # remove whitespace/newlines
+        for fmt in ("%d-%b-%y", "%d-%b-%Y"):
+            try:
+                return datetime.datetime.strptime(d, fmt).date()
+            except ValueError:
+                continue
+        raise ValueError(f"Date format not recognized: {d}")
 
-    # Keep only future dates
-    future_expiries = [d for d in expiry_dates_dt if d >= today]
+    # Parse all unique expiry dates
+    expiry_dates_dt = [parse_expiry(d) for d in df_raw["expiryDate"].unique()]
 
+    today = datetime.date.today()
+    future_expiries = sorted([d for d in expiry_dates_dt if d >= today])
     # Sort ascending and take next 7
     next_7_expiries = sorted(future_expiries)[:7]
 
