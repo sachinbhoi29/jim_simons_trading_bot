@@ -1,12 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-
-
 class BaseOverlay:
     def plot(self, ax, df):
         raise NotImplementedError("Overlay must implement a plot method.")
-
 
 class MovingAverageOverlay(BaseOverlay):
     def __init__(self, window=20, color="blue",show=True):
