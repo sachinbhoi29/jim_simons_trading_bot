@@ -32,4 +32,4 @@ def get_options_data(symbol: str, save_dir: str = "feature_development/options/d
     return csv_file
 
 # ---------------- Example usage ----------------
-csv_path = get_options_data("NIFTY")
+csv_path = get_options_data("BANKNIFTY")
