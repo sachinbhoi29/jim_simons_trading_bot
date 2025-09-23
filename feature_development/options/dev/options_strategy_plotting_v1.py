@@ -33,7 +33,7 @@ class OptionStrategy:
         lot_sizes = {
             'NIFTY': 75,
             'NIFTY50': 75,
-            'BANKNIFTY': 15,
+            'BANKNIFTY': 35,
             'FINNIFTY': 40,
             'MIDCPNIFTY': 75
         }
