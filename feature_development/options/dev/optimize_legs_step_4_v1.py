@@ -1,46 +1,43 @@
-#not validated
 import json
 import numpy as np
 import pandas as pd
 from math import isfinite
 
-# Load data
-with open('feature_development/options/dev/strategy_output.json') as f:
-    strategy_json = json.load(f)
-
-df = pd.read_csv("feature_development/options/dev/NIFTY_options_30Sep2025_with_greeks.csv")
-
 # ---- Helper functions ----
 def mid_price(bid, ask, last):
+    """Compute mid price; fallback to last price."""
     try:
-        if pd.notna(bid) and pd.notna(ask) and isfinite(bid) and isfinite(ask):
+        if bid and ask and isfinite(bid) and isfinite(ask):
             return float((bid + ask) / 2.0)
-        if pd.notna(last) and isfinite(last):
+        if last and isfinite(last):
             return float(last)
     except Exception:
         pass
     return np.nan
 
-def compute_pop_for_seller_put(row):
-    pdlt = row.get('Put_Delta', row.get('PE_delta', np.nan))
-    if pd.isna(pdlt):
-        return np.nan
-    return float(1.0 - abs(pdlt))
-
-def compute_pop_for_seller_call(row):
-    cdlt = row.get('Call_Delta', row.get('CE_delta', np.nan))
-    if pd.isna(cdlt):
-        return np.nan
-    return float(1.0 - abs(cdlt))
-
 def safe_get(row, *cols):
+    """Return first valid numeric value from row for given columns."""
     for c in cols:
-        if c in row and pd.notna(row[c]):
+        if c in row and pd.notna(row[c]) and row[c] != 0:
             return float(row[c])
     return np.nan
 
+def compute_pop_put(row):
+    """Probability of profit for short put (seller)."""
+    delta = safe_get(row, 'Put_Delta', 'PE_delta')
+    if pd.isna(delta):
+        return np.nan
+    return 1 - abs(delta)
+
+def compute_pop_call(row):
+    """Probability of profit for short call (seller)."""
+    delta = safe_get(row, 'Call_Delta', 'CE_delta')
+    if pd.isna(delta):
+        return np.nan
+    return 1 - abs(delta)
+
 # ---- Bull Put Spread ----
-def find_best_bull_put_spread(df, max_width=400):
+def find_best_bull_put_spread(df, spot, max_width=400, max_dist=500):
     results = []
     strikes = sorted(df['StrikePrice'].unique())
     strike_rows = {s: df[df['StrikePrice']==s].iloc[0] for s in strikes}
@@ -48,11 +45,11 @@ def find_best_bull_put_spread(df, max_width=400):
     for i, Ks in enumerate(strikes):
         for Kb in strikes[:i]:
             width = Ks - Kb
-            if width <=0 or width > max_width:
+            # skip if width invalid or strikes too far from spot
+            if width <= 0 or width > max_width or abs(Ks - spot) > max_dist or abs(Kb - spot) > max_dist:
                 continue
 
-            row_short = strike_rows[Ks]
-            row_long = strike_rows[Kb]
+            row_short, row_long = strike_rows[Ks], strike_rows[Kb]
 
             short_premium = mid_price(
                 safe_get(row_short,'PE_bidprice','Put_Bid','PE_bidPrice'),
@@ -68,15 +65,13 @@ def find_best_bull_put_spread(df, max_width=400):
                 continue
 
             credit = short_premium - long_premium
-            if credit <=0 or credit > width:
+            if credit <= 0 or credit > width:
                 continue
 
-            max_profit = float(credit)
-            max_loss = float(width - credit)
-            risk_reward = float(max_profit / max_loss) if max_loss>0 else None
-            pop = compute_pop_for_seller_put(row_short)
-
-            ev = float(pop * max_profit - (1-pop)*max_loss) if pd.notna(pop) else None
+            max_profit = credit
+            max_loss = width - credit
+            pop = compute_pop_put(row_short)
+            ev = pop * max_profit - (1-pop) * max_loss if pd.notna(pop) else None
 
             results.append({
                 "strategy": "Bull Put Spread",
@@ -86,26 +81,26 @@ def find_best_bull_put_spread(df, max_width=400):
                 "credit": round(credit,2),
                 "max_profit": round(max_profit,2),
                 "max_loss": round(max_loss,2),
-                "risk_reward": round(risk_reward,2) if risk_reward else None,
+                "risk_reward": round(max_profit/max_loss,2) if max_loss>0 else None,
                 "pop": round(pop,2) if pop else None,
                 "ev": round(ev,2) if ev else None,
                 "break_even": round(Ks - credit,2)
             })
+
     if not results:
-        return None
-    # pick best by EV
-    best = max(results, key=lambda x: x['ev'] if x['ev'] is not None else -np.inf)
-    return best
+        return {"note":"No valid Bull Put Spread found near spot"}
+    return max(results, key=lambda x: x['ev'] if x['ev'] is not None else -np.inf)
 
 # ---- Covered Call ----
-def find_best_covered_call(df, spot_price):
+def find_best_covered_call(df, spot, max_dist=500):
     results = []
     strikes = sorted(df['StrikePrice'].unique())
     strike_rows = {s: df[df['StrikePrice']==s].iloc[0] for s in strikes}
 
     for Kc in strikes:
-        if Kc < spot_price:
+        if Kc < spot or abs(Kc - spot) > max_dist:
             continue
+
         row = strike_rows[Kc]
         premium = mid_price(
             safe_get(row,'CE_bidprice','Call_Bid','CE_bidPrice'),
@@ -115,15 +110,15 @@ def find_best_covered_call(df, spot_price):
         if pd.isna(premium):
             continue
 
-        max_profit = float((Kc - spot_price) + premium)
-        max_loss = float(spot_price - premium)
-        break_even = float(spot_price - premium)
-        pop = compute_pop_for_seller_call(row)
-        ev = float(pop * max_profit - (1-pop) * max_loss) if pd.notna(pop) else None
+        max_profit = (Kc - spot) + premium
+        max_loss = spot - premium
+        break_even = spot - premium
+        pop = compute_pop_call(row)
+        ev = pop * max_profit - (1-pop) * max_loss if pd.notna(pop) else None
 
         results.append({
             "strategy": "Covered Call",
-            "description": f"Buy Stock at {round(spot_price,2)}, Sell Call {int(Kc)} at premium {round(premium,2)}",
+            "description": f"Buy Stock at {round(spot,2)}, Sell Call {int(Kc)} at premium {round(premium,2)}",
             "strike": int(Kc),
             "premium": round(premium,2),
             "max_profit": round(max_profit,2),
@@ -133,19 +128,19 @@ def find_best_covered_call(df, spot_price):
         })
 
     if not results:
-        return None
-    best = max(results, key=lambda x: x['max_profit'])
-    return best
+        return {"note":"No valid Covered Call found near spot"}
+    return max(results, key=lambda x: x['max_profit'])
 
 # ---- Cash-Secured Put ----
-def find_best_cash_secured_put(df, spot_price):
+def find_best_cash_secured_put(df, spot, max_dist=500):
     results = []
     strikes = sorted(df['StrikePrice'].unique())
     strike_rows = {s: df[df['StrikePrice']==s].iloc[0] for s in strikes}
 
     for Kp in strikes:
-        if Kp > spot_price:
+        if Kp > spot or abs(Kp - spot) > max_dist:
             continue
+
         row = strike_rows[Kp]
         premium = mid_price(
             safe_get(row,'PE_bidprice','Put_Bid','PE_bidPrice'),
@@ -155,10 +150,10 @@ def find_best_cash_secured_put(df, spot_price):
         if pd.isna(premium):
             continue
 
-        max_profit = float(premium)
-        max_loss = float(Kp - premium)
-        break_even = float(Kp - premium)
-        pop = compute_pop_for_seller_put(row)
+        max_profit = premium
+        max_loss = Kp - premium
+        break_even = Kp - premium
+        pop = compute_pop_put(row)
 
         results.append({
             "strategy": "Cash-Secured Put",
@@ -172,9 +167,8 @@ def find_best_cash_secured_put(df, spot_price):
         })
 
     if not results:
-        return None
-    best = max(results, key=lambda x: x['max_profit'])
-    return best
+        return {"note":"No valid Cash-Secured Put found near spot"}
+    return max(results, key=lambda x: x['max_profit'])
 
 # ---- Runner ----
 strategy_function_map = {
@@ -183,7 +177,7 @@ strategy_function_map = {
     'Cash-Secured Put': find_best_cash_secured_put
 }
 
-def analyze_strategies(df, strategy_json):
+def analyze_strategies(df, strategy_json, max_dist=500):
     spot = float(strategy_json['market_snapshot']['spot_price'])
     recommendations = {}
     for strat in strategy_json['strategies']:
@@ -193,16 +187,21 @@ def analyze_strategies(df, strategy_json):
             recommendations[name] = {"note":"No automated scanner implemented"}
             continue
         if name == 'Covered Call':
-            best = func(df, spot)
+            best = func(df, spot, max_dist)
         elif name == 'Cash-Secured Put':
-            best = func(df, spot)
+            best = func(df, spot, max_dist)
         else:
-            best = func(df)
-        recommendations[name] = best if best else {"note":"No valid leg found"}
+            best = func(df, spot, max_dist)
+        recommendations[name] = best
     return recommendations
 
 # ---- Run ----
-strategy_recommendations = analyze_strategies(df, strategy_json)
+df = pd.read_csv("feature_development/options/dev/NIFTY_options_30Sep2025_with_greeks.csv")
+with open('feature_development/options/dev/strategy_output.json') as f:
+    strategy_json = json.load(f)
+
+strategy_recommendations = analyze_strategies(df, strategy_json, max_dist=500)
+
 with open('feature_development/options/dev/strategy_recommendations.json','w') as f:
     json.dump(strategy_recommendations, f, indent=2)
 

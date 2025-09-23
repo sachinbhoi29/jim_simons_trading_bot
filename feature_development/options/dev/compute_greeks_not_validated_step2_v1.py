@@ -1,5 +1,5 @@
 # compute_greeks.py
-# greeks calculation, I am not sure if it is right
+# greeks calculation, they are not exact but are very close, check for direction as well
 import os
 from datetime import datetime
 import numpy as np
@@ -64,7 +64,7 @@ def black_scholes_greeks(S, K, r, q, sigma, T, option_type):
                         - q * S * np.exp(-q * T) * norm.cdf(-d1))
 
     gamma = (np.exp(-q * T) * pdf_d1) / (S * sigma * sqrtT)
-    vega = S * np.exp(-q * T) * pdf_d1 * sqrtT  # per 1.0 vol (not per 1%)
+    vega = (S * np.exp(-q * T) * pdf_d1 * sqrtT) / 100.0  # per 1% vol
     theta_per_day = theta_annual / 365.0
     # convert vega to per 1% (optional) — we'll keep as absolute (per 1.0 vol)
     return (delta, gamma, vega, theta_per_day, rho)
@@ -150,8 +150,9 @@ def add_greeks_to_csv(
     if strike_col is None:
         raise ValueError("Could not find a strike price column (tried strikePrice/Strike/strike).")
 
-    ce_iv_col = _col_candidates("CE_", ["CE_impliedVolatility", "CE_IV", "call_iv", "CE_impliedvolatility"])
-    pe_iv_col = _col_candidates("PE_", ["PE_impliedVolatility", "PE_IV", "put_iv", "PE_impliedvolatility"])
+    # Always prefer CE_impliedVolatility / PE_impliedVolatility
+    ce_iv_col = "CE_impliedVolatility" if "CE_impliedVolatility" in df_raw.columns else None
+    pe_iv_col = "PE_impliedVolatility" if "PE_impliedVolatility" in df_raw.columns else None
     ce_ltp_col = _col_candidates("CE_", ["CE_lastPrice", "CE_LTP", "call_lastPrice", "CE_lastprice"])
     pe_ltp_col = _col_candidates("PE_", ["PE_lastPrice", "PE_LTP", "put_lastPrice", "PE_lastprice"])
     ce_oi_col  = _col_candidates("CE_", ["CE_openInterest", "CE_OI", "call_oi"])
@@ -183,8 +184,11 @@ def add_greeks_to_csv(
         else:
             return pd.Series([default] * len(df), index=df.index)
 
-    ce_iv = _get_col_or_default(df_work, ce_iv_col, default=np.nan) / 100.0  # convert % -> decimal if necessary (nse gives IV in % sometimes)
+    # Fix if IV looks already in decimals (e.g. 0.25 instead of 25.0)
+    ce_iv = _get_col_or_default(df_work, ce_iv_col, default=np.nan) / 100.0
     pe_iv = _get_col_or_default(df_work, pe_iv_col, default=np.nan) / 100.0
+    ce_iv = ce_iv.apply(lambda x: x if pd.isna(x) or x < 3 else x / 100.0)
+    pe_iv = pe_iv.apply(lambda x: x if pd.isna(x) or x < 3 else x / 100.0)
     ce_ltp = _get_col_or_default(df_work, ce_ltp_col, default=np.nan)
     pe_ltp = _get_col_or_default(df_work, pe_ltp_col, default=np.nan)
     ce_oi  = _get_col_or_default(df_work, ce_oi_col, default=np.nan)
@@ -192,7 +196,7 @@ def add_greeks_to_csv(
 
     S_assumed = None
     # If file contains underlyingValue column (common in json_normalize)
-    for cand in ("underlyingValue", "underlying_value", "underlying"):
+    for cand in ("spotPrice", "underlyingValue", "underlying_value", "underlying"):
         if cand in df_work.columns:
             S_assumed = float(df_work[cand].iloc[0])
             break
@@ -318,5 +322,5 @@ def add_greeks_to_csv(
     return output_csv, output_excel
 
 # Example usage:
-csv_out, xlsx_out = add_greeks_to_csv("feature_development/options/dev/NIFTY_options_30Sep2025.csv")
+csv_out, xlsx_out = add_greeks_to_csv("feature_development/options/dev/BANKNIFTY_options_30Sep2025.csv")
 # print("Saved:", csv_out, xlsx_out)

@@ -7,12 +7,16 @@ from openpyxl.styles import PatternFill, Font
 import os
 import datetime
 
-def fetch_nifty_options(csv_file_path, save_dir="feature_development/options/dev"):
-    symbol = "NIFTY"
+def fetch_options(csv_file_path, save_dir="feature_development/options/dev",symbol = "NIFTY"):
     
     # ---------------- Step 1: Get Spot Price ----------------
-    print("Fetching current spot price from Yahoo Finance...")
-    ticker = yf.Ticker("^NSEI")   # NSE Nifty 50 Index
+    ticker_map = {
+        "NIFTY": "^NSEI",
+        "BANKNIFTY": "^NSEBANK"
+    }
+
+    yahoo_symbol = ticker_map.get(symbol.upper(), "^NSEI")  # fallback to NIFTY if unknown
+    ticker = yf.Ticker(yahoo_symbol)
     spot_price = ticker.history(period="1d")["Close"].iloc[-1]
     spot_price = round(float(spot_price), 2)
     atm_strike = round(spot_price / 50) * 50  # NSE has 50pt strikes
@@ -199,6 +203,6 @@ def fetch_nifty_options(csv_file_path, save_dir="feature_development/options/dev
 
 # ---------------- Run ---------------
 if __name__ == "__main__":
-    csv_file = "feature_development/options/dev/NIFTY_optionchain_raw.csv"  # your raw CSV file
-    csv_path, excel_path = fetch_nifty_options(csv_file_path=csv_file)
+    csv_file = "feature_development/options/dev/BANKNIFTY_optionchain_raw.csv"  # your raw CSV file
+    csv_path, excel_path = fetch_options(csv_file_path=csv_file,symbol = 'BANKNIFTY')
     print("Cleaned files ready:", csv_path, excel_path)
