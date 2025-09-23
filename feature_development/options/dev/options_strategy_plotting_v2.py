@@ -65,7 +65,7 @@ class OptionStrategy:
         lot_sizes = {
             'NIFTY': 75,
             'NIFTY50': 75,
-            'BANKNIFTY': 15,
+            'BANKNIFTY': 35,
             'FINNIFTY': 40,
             'MIDCPNIFTY': 75
         }
@@ -165,6 +165,9 @@ class OptionStrategy:
         x_max = min(price_range.max(), zone_2sigma_max)
 
         zoom_mask = (price_range >= x_min) & (price_range <= x_max)
+        zoom_mask = (price_range >= x_min) & (price_range <= x_max)
+        if not zoom_mask.any():   # fallback
+            zoom_mask[:] = True 
         y_zoom_min = net_payoff[zoom_mask].min()
         y_zoom_max = net_payoff[zoom_mask].max()
         y_padding = (y_zoom_max - y_zoom_min) * 0.1 if y_zoom_max != y_zoom_min else 1000
@@ -203,20 +206,27 @@ class OptionStrategy:
 
         fig.show()
 
+def get_price_range(spot_price, buffer=1000, step=100):
+    """
+    Dynamically generate a price range around the spot price.
+    """
+    min_price = int((spot_price - buffer) // step * step)
+    max_price = int((spot_price + buffer) // step * step) + step
+    return np.arange(min_price, max_price + step, step)
 
 # ============================
 # Example usage
 # ============================
 
 # Load CSV
-df = pd.read_csv("feature_development/options/dev/NIFTY_optionchain_raw.csv")
+df = pd.read_csv("feature_development/options/dev/BANKNIFTY_optionchain_raw.csv")
 
 # Initialize strategy
 strategy = OptionStrategy(df, expiry=None)
 
 # Add legs with different expiries
-strategy.add_leg('P', 'SELL', 25650, "30-Sep-2025")
-strategy.add_leg('P', 'BUY', 25400, "30-Sep-2025")
+strategy.add_leg('C', 'BUY', 55500, "30-Sep-2025")
+strategy.add_leg('C', 'BUY', 55100, "30-Sep-2025")
 
 # Show strategy
 strategy.show_strategy()
@@ -226,5 +236,6 @@ margin = strategy.estimate_margin()
 print(f"Estimated Margin: ₹{margin:,.0f}")
 
 # Plot payoff
-price_range = np.arange(25000, 26000, 50)
+# price_range = np.arange(53000, 58000, 100)  # or wider if needed
+price_range = get_price_range(strategy.spot_price, buffer=1500, step=100)
 strategy.plot_payoff(price_range)
