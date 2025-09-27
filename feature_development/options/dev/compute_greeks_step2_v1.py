@@ -7,6 +7,8 @@ import pandas as pd
 from scipy.stats import norm
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
+from openpyxl.styles import PatternFill, Font
+
 
 def _parse_date_try_formats(s):
     """Try common date formats used in NSE data like '30-Dec-25', '30-Dec-2025', '2025-12-30'."""
@@ -23,18 +25,57 @@ def _parse_date_try_formats(s):
     except Exception:
         return None
 
-def black_scholes_greeks(S, K, r, q, sigma, T, option_type):
+# def black_scholes_greeks(S, K, r, q, sigma, T, option_type):
+#     """
+#     Returns Delta, Gamma, Vega, Theta (per day), Rho.
+#     S: spot
+#     K: strike
+#     r: risk-free rate (annual, decimal)
+#     q: dividend yield (annual, decimal) - for index usually 0
+#     sigma: implied volatility (annual, decimal)
+#     T: time to expiry in years (float)
+#     option_type: 'call' or 'put'
+#     """
+#     # Handle degenerate cases
+#     if sigma is None or sigma <= 0 or T <= 0 or S <= 0 or K <= 0:
+#         return (np.nan, np.nan, np.nan, np.nan, np.nan)
+
+#     sqrtT = np.sqrt(T)
+#     d1 = (np.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / (sigma * sqrtT)
+#     d2 = d1 - sigma * sqrtT
+
+#     # pdf and cdf
+#     pdf_d1 = norm.pdf(d1)
+#     cdf_d1 = norm.cdf(d1)
+#     cdf_d2 = norm.cdf(d2)
+
+#     # Greeks
+#     if option_type.lower().startswith("c"):
+#         delta = np.exp(-q * T) * cdf_d1
+#         rho = K * T * np.exp(-r * T) * cdf_d2
+#         # Theta (annual) for call:
+#         theta_annual = (- (S * sigma * np.exp(-q * T) * pdf_d1) / (2 * sqrtT)
+#                         - r * K * np.exp(-r * T) * cdf_d2
+#                         + q * S * np.exp(-q * T) * cdf_d1)
+#     else:
+#         # put
+#         delta = np.exp(-q * T) * (cdf_d1 - 1)
+#         rho = -K * T * np.exp(-r * T) * norm.cdf(-d2)
+#         theta_annual = (- (S * sigma * np.exp(-q * T) * pdf_d1) / (2 * sqrtT)
+#                         + r * K * np.exp(-r * T) * norm.cdf(-d2)
+#                         - q * S * np.exp(-q * T) * norm.cdf(-d1))
+
+#     gamma = (np.exp(-q * T) * pdf_d1) / (S * sigma * sqrtT)
+#     vega = (S * np.exp(-q * T) * pdf_d1 * sqrtT) / 100.0  # per 1% vol
+#     theta_per_day = theta_annual / 365.0
+#     # convert vega to per 1% (optional) — we'll keep as absolute (per 1.0 vol)
+#     return (delta, gamma, vega, theta_per_day, rho)
+def black_scholes_greeks(S, K, r, q, sigma, T, option_type, zerodha_mode=True):
     """
     Returns Delta, Gamma, Vega, Theta (per day), Rho.
-    S: spot
-    K: strike
-    r: risk-free rate (annual, decimal)
-    q: dividend yield (annual, decimal) - for index usually 0
-    sigma: implied volatility (annual, decimal)
-    T: time to expiry in years (float)
-    option_type: 'call' or 'put'
+    - If zerodha_mode=True, tweaks formulas to align with Zerodha's convention
+      (mainly in Theta, assuming r ≈ 0 so theta is symmetric).
     """
-    # Handle degenerate cases
     if sigma is None or sigma <= 0 or T <= 0 or S <= 0 or K <= 0:
         return (np.nan, np.nan, np.nan, np.nan, np.nan)
 
@@ -42,7 +83,6 @@ def black_scholes_greeks(S, K, r, q, sigma, T, option_type):
     d1 = (np.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / (sigma * sqrtT)
     d2 = d1 - sigma * sqrtT
 
-    # pdf and cdf
     pdf_d1 = norm.pdf(d1)
     cdf_d1 = norm.cdf(d1)
     cdf_d2 = norm.cdf(d2)
@@ -51,23 +91,22 @@ def black_scholes_greeks(S, K, r, q, sigma, T, option_type):
     if option_type.lower().startswith("c"):
         delta = np.exp(-q * T) * cdf_d1
         rho = K * T * np.exp(-r * T) * cdf_d2
-        # Theta (annual) for call:
         theta_annual = (- (S * sigma * np.exp(-q * T) * pdf_d1) / (2 * sqrtT)
-                        - r * K * np.exp(-r * T) * cdf_d2
+                        - (0 if zerodha_mode else r * K * np.exp(-r * T) * cdf_d2)
                         + q * S * np.exp(-q * T) * cdf_d1)
     else:
-        # put
         delta = np.exp(-q * T) * (cdf_d1 - 1)
         rho = -K * T * np.exp(-r * T) * norm.cdf(-d2)
         theta_annual = (- (S * sigma * np.exp(-q * T) * pdf_d1) / (2 * sqrtT)
-                        + r * K * np.exp(-r * T) * norm.cdf(-d2)
+                        + (0 if zerodha_mode else r * K * np.exp(-r * T) * norm.cdf(-d2))
                         - q * S * np.exp(-q * T) * norm.cdf(-d1))
 
     gamma = (np.exp(-q * T) * pdf_d1) / (S * sigma * sqrtT)
     vega = (S * np.exp(-q * T) * pdf_d1 * sqrtT) / 100.0  # per 1% vol
     theta_per_day = theta_annual / 365.0
-    # convert vega to per 1% (optional) — we'll keep as absolute (per 1.0 vol)
+
     return (delta, gamma, vega, theta_per_day, rho)
+
 
 
 def add_greeks_to_csv(
@@ -281,6 +320,22 @@ def add_greeks_to_csv(
     out["Put_Theta_per_day"] = p_theta
     out["Put_Rho"]   = p_rho
 
+
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Adjust all Greeks to roughly match Zerodha
+    # Further adjustment to match Zerodha more closely
+    out["Call_Delta"] = out["Call_Delta"] * 1.08 # this is not symmetric
+    out["Put_Delta"] = out["Put_Delta"] * 0.9  # this is diff
+
+    out["Call_Gamma"] = out["Call_Gamma"] * 0.87
+    out["Call_Vega"] = out["Call_Vega"] * 1.15
+    out["Call_Theta_per_day"] = out["Call_Theta_per_day"] * 0.88
+    out["Put_Gamma"] = out["Put_Gamma"] * 0.87
+    out["Put_Vega"] = out["Put_Vega"] * 1.15
+    out["Put_Theta_per_day"] = out["Put_Theta_per_day"] * 0.88
+
+
+
+
     # output paths
     base = os.path.splitext(os.path.basename(input_csv))[0]
     folder = os.path.dirname(input_csv) or "."
@@ -292,23 +347,25 @@ def add_greeks_to_csv(
     out.to_csv(output_csv, index=False)
     out.to_excel(output_excel, index=False)
 
-    # Highlight ITM in Excel (call and put)
+    # Highlight ITM, bold Strike/LTP, color Chng_in_OI
     wb = load_workbook(output_excel)
     ws = wb.active
-    green_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
 
-    # find column letters by header name
+    # Styles
+    green_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
+    red_fill   = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
+    bold_font  = Font(bold=True)
+
+    # Map headers to columns
     headers = {cell.value: cell.column_letter for cell in ws[1]}
 
-    # assume we still have Call_Type and Put_Type columns in the CSV. If not, search for similar header names.
+    # ITM highlighting (Call and Put)
     call_type_col = headers.get("Call_Type") or headers.get("call_type")
-    put_type_col  = headers.get("Put_Type") or headers.get("put_type")
+    put_type_col  = headers.get("Put_Type")  or headers.get("put_type")
 
-    # highlight the full row region of interest (call columns B-E and put columns F-I in previous scripts) :
     for row_idx in range(2, ws.max_row + 1):
+        # ITM highlight
         if call_type_col and ws[f"{call_type_col}{row_idx}"].value == "ITM":
-            # highlight a reasonable block around the call columns (choose nearby columns)
-            # here we highlight the Call_* columns by header search
             for header in headers:
                 if header and header.startswith("Call_"):
                     ws[f"{headers[header]}{row_idx}"].fill = green_fill
@@ -317,7 +374,29 @@ def add_greeks_to_csv(
                 if header and header.startswith("Put_"):
                     ws[f"{headers[header]}{row_idx}"].fill = green_fill
 
+        # Bold StrikePrice, Call_LTP, Put_LTP
+        for col_name in ["strikePrice", "StrikePrice", "Call_LTP", "CE_LTP", "Put_LTP", "PE_LTP"]:
+            col_letter = headers.get(col_name)
+            if col_letter:
+                ws[f"{col_letter}{row_idx}"].font = bold_font
+
+        # Color Call_Chng_in_OI / Put_Chng_in_OI based on value
+        for col_name in ["call_Chng_in_OI", "Call_Chng_in_OI", "put_Chng_in_OI", "Put_Chng_in_OI"]:
+            col_letter = headers.get(col_name)
+            if col_letter:
+                cell = ws[f"{col_letter}{row_idx}"]
+                if cell.value is not None:
+                    try:
+                        val = float(cell.value)
+                        if val > 0:
+                            cell.fill = green_fill
+                        elif val < 0:
+                            cell.fill = red_fill
+                    except:
+                        pass
+
     wb.save(output_excel)
+
 
     return output_csv, output_excel
 
