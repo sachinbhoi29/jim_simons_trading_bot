@@ -8,7 +8,7 @@ import numpy as np
 # Step 1: Load and Clean Data
 # ------------------------------
 
-df = pd.read_csv("news_market_combined_20250820_1515_to_20250821_0915.csv")
+df = pd.read_csv("feature_development/news_trading_bot/prod/stock_news_20250927_0915.csv")
 df = df.dropna(subset=["title", "stock"])
 
 def clean_text(text):
@@ -91,7 +91,7 @@ df['weighted_score'] = df['sentiment_score'] * df['weight']
 # Step 4: Export Per-Article Sentiment
 # ------------------------------
 
-df.to_csv("sentiment_per_news.csv", index=False)
+df.to_csv("feature_development/news_trading_bot/prod/sentiment_per_news.csv", index=False)
 print("✅ Saved per-news sentiment with category/weight: sentiment_per_news.csv")
 
 # ------------------------------
@@ -120,5 +120,5 @@ grouped_df["avg_weight"] = grouped_df["avg_weight"].round(2)
 # Step 6: Save Aggregated Results
 # ------------------------------
 
-grouped_df.to_csv("sentiment_by_stock.csv", index=False)
+grouped_df.to_csv("feature_development/news_trading_bot/prod/sentiment_by_stock.csv", index=False)
 print("✅ Saved grouped sentiment: sentiment_by_stock.csv")
