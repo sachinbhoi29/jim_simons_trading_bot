@@ -225,8 +225,8 @@ df = pd.read_csv("feature_development/options/dev/BANKNIFTY_optionchain_raw.csv"
 strategy = OptionStrategy(df, expiry=None)
 
 # Add legs with different expiries
-strategy.add_leg('C', 'BUY', 55500, "30-Sep-2025")
-strategy.add_leg('C', 'BUY', 55100, "30-Sep-2025")
+strategy.add_leg('P', 'SELL', 55000, "30-Sep-2025")
+# strategy.add_leg('C', 'BUY', 55100, "30-Sep-2025")
 
 # Show strategy
 strategy.show_strategy()

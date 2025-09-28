@@ -15,22 +15,22 @@ def band_score(value, low, high, comfortable_window=0.02):
     dist = min(abs(value - low), abs(value - high))
     return max(0.0, 1 - dist / (comfortable_window * max(1, abs(value))))
 
-def approximate_margin(option_type, strike, lot_size, spot_price):
+def approximate_margin(option_type, strike, spot_price):
     """
-    Rough estimate of margin for a short option.
-    Short Put: margin ~ strike * lot_size
-    Short Call: margin ~ spot_price * 3 * lot_size (rough cap)
+    Rough estimate of margin for a short option (ignores lot size).
+    Short Put: margin ~ strike
+    Short Call: margin ~ spot_price * 3 (rough cap)
     """
     if option_type == 'P':
-        return strike * lot_size
+        return strike
     elif option_type == 'C':
-        return spot_price * 3 * lot_size  # conservative
+        return spot_price * 3  # conservative
     return 1e6  # fallback
 
 # ===============================
 # Risk-adjusted scoring functions
 # ===============================
-def score_short_put(row, lot_size, spot_price):
+def score_short_put(row, spot_price):
     strike = row['PE_strikePrice']
     ltp = row['PE_lastPrice']
     delta = safe_abs(row['Put_Delta'])
@@ -52,7 +52,7 @@ def score_short_put(row, lot_size, spot_price):
     liq_score = 0.5 * np.log1p(oi + vol)
 
     # 2️⃣ Risk-adjusted ROI
-    margin = approximate_margin('P', strike, lot_size, spot_price)
+    margin = approximate_margin('P', strike, spot_price)
     roi_score = min(ltp / margin * 100, 1.0)
 
     total_score = (
@@ -64,7 +64,7 @@ def score_short_put(row, lot_size, spot_price):
             "gamma": gamma, "vega": vega, "dte": dte, "oi": oi, "vol": vol,
             "score": total_score, "roi_est": ltp/margin}
 
-def score_short_call(row, lot_size, spot_price):
+def score_short_call(row, spot_price):
     strike = row['CE_strikePrice']
     ltp = row['CE_lastPrice']
     delta = safe_abs(row['Call_Delta'])
@@ -83,7 +83,7 @@ def score_short_call(row, lot_size, spot_price):
     gamma_score = -np.tanh(gamma/0.02)
     dte_score = 1.0 if 7 <= dte <= 30 else 0.5
     liq_score = 0.5 * np.log1p(oi + vol)
-    margin = approximate_margin('C', strike, lot_size, spot_price)
+    margin = approximate_margin('C', strike, spot_price)
     roi_score = min(ltp / margin * 100, 1.0)
 
     total_score = (
@@ -150,7 +150,7 @@ def score_long_call(row):
 # ===============================
 # Generic risk-adjusted optimizer
 # ===============================
-def optimize_leg(df, option_type='C', position='Buy', top_n=10, lot_size=1, spot_price=1):
+def optimize_leg(df, option_type='C', position='Buy', top_n=10, spot_price=1):
     scoring_map = {
         ('C','Buy'): score_long_call,
         ('C','Sell'): score_short_call,
@@ -167,7 +167,7 @@ def optimize_leg(df, option_type='C', position='Buy', top_n=10, lot_size=1, spot
 
     for _, row in df.iterrows():
         if position.lower() == 'sell':
-            scored = scorer(row, lot_size, spot_price)
+            scored = scorer(row, spot_price)
         else:
             scored = scorer(row)
         if scored is not None:
@@ -183,21 +183,12 @@ if __name__ == "__main__":
     csv_path = Path("feature_development/options/dev/BANKNIFTY_options_30Sep2025_with_greeks.csv")
     df = pd.read_csv(csv_path)
 
-    spot_price = 54000   # current BANKNIFTY spot price
-    lot_size = 15        # BANKNIFTY lot size
+    spot_price = df['PE_underlyingValue'].dropna().iloc[0]
 
     # Short puts
-    short_puts = optimize_leg(df, option_type='P', position='Sell', top_n=10, lot_size=lot_size, spot_price=spot_price)
+    short_puts = optimize_leg(df, option_type='P', position='Sell', top_n=10, spot_price=spot_price)
     print("Optimized Short Puts:\n", pd.DataFrame(short_puts))
 
-    # Long calls
-    long_calls = optimize_leg(df, option_type='C', position='Buy', top_n=10)
-    print("Optimized Long Calls:\n", pd.DataFrame(long_calls))
-
-    # Long puts
-    long_puts = optimize_leg(df, option_type='P', position='Buy', top_n=10)
-    print("Optimized Long Puts:\n", pd.DataFrame(long_puts))
-
     # Short calls
-    short_calls = optimize_leg(df, option_type='C', position='Sell', top_n=10, lot_size=lot_size, spot_price=spot_price)
+    short_calls = optimize_leg(df, option_type='C', position='Sell', top_n=10, spot_price=spot_price)
     print("Optimized Short Calls:\n", pd.DataFrame(short_calls))
