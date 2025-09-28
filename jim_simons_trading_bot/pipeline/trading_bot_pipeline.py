@@ -55,3 +55,14 @@ class pilotPipeline:
         print("Step 6: Merging stock data with NIFTY50 regime data...")
         self.df_stock_regime = merge_stock_with_nifty_regime(self.df_stock_indicators_and_price_action, self.nifty_combined_actual_and_forecast_df)
         return self.df_stock_regime
+
+
+if __name__ == "__main__":
+    pp = pilotPipeline()
+    # pp.get_data()
+    pp.regime_detector()
+    pp.markvo_chain()
+    pp.indicators_calculation()
+    pp.price_action()
+    stock_nifty_combined = pp.merge_stock_with_nifty_regime()
+    stock_nifty_combined.to_csv("data/tcs_nifty_combined.csv")

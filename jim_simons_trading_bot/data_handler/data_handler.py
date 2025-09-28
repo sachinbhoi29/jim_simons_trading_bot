@@ -8,7 +8,7 @@ import random
 from abc import ABC, abstractmethod
 import datetime
 # Import NSElib
-from nselib import capital_market, derivatives
+# from nselib import capital_market, derivatives
 
 
 # Load configuration

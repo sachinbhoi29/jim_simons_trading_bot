@@ -102,21 +102,35 @@ class ZigzagSR:
 
         return df
 
-    def compute_fib_levels(self, df, levels=None):
+    def compute_fib_levels(self, df, levels=None, min_move_pct=0.01):
+        """
+        Compute Fibonacci retracement levels for significant ZigZag legs only.
+
+        Parameters:
+        - df: DataFrame with 'Close'
+        - levels: list of Fibonacci levels (default [0,0.236,0.382,0.5,0.618,0.786,1])
+        - min_move_pct: minimum price change (%) to consider the leg significant
+        """
         if levels is None:
             levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]
 
         fib_data = []
+        close = df["Close"].to_numpy().ravel()
         for i in range(1, len(self.zigzag_idx)):
             idx1, idx2 = self.zigzag_idx[i-1], self.zigzag_idx[i]
-            price1, price2 = df["Close"].iloc[idx1], df["Close"].iloc[idx2]
+            price1, price2 = close[idx1], close[idx2]
+
+            # Compute absolute and relative move
+            move = abs(price2 - price1)
+            move_pct = move / price1
+
+            if move_pct < min_move_pct:
+                continue  # skip insignificant moves
 
             # Up leg
             if price2 > price1:
-                move = price2 - price1
                 fibs = {f"{int(l*100)}%": price2 - l*move for l in levels}
             else:  # Down leg
-                move = price1 - price2
                 fibs = {f"{int(l*100)}%": price2 + l*move for l in levels}
 
             fib_data.append({
@@ -124,8 +138,10 @@ class ZigzagSR:
                 "start_price": price1, "end_price": price2,
                 "fibs": fibs
             })
+
         self.fib_levels = fib_data
         return fib_data
+
 
     def plot_zigzag_midline(self, ax, df, zigzag_idx, close, color="magenta", linestyle="--", linewidth=2):
         """
@@ -177,6 +193,8 @@ class ZigzagSR:
         if self.show_fibo:
             fib_data = self.compute_fib_levels(df)
             for fib_leg in fib_data:
+                if self.show_only_latest_fibo:
+                    fib_leg = fib_data[-1]  # pick the last leg
                 idx1, idx2 = fib_leg["start_idx"], fib_leg["end_idx"]
                 for label, price in fib_leg["fibs"].items():
                     ax.hlines(price, df.index[idx1], df.index[idx2],
