@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 class BaseOverlay:
     def plot(self, ax, df):
         raise NotImplementedError("Overlay must implement a plot method.")
+
 
 class MovingAverageOverlay(BaseOverlay):
     def __init__(self, window=20, color="blue",show=True):
@@ -264,4 +266,29 @@ class FibonacciOverlay(BaseOverlay):
         ax.text(x_pos, last_close + y_offset, f" {closest_level}", color='black', fontsize=9, va="bottom", ha="center")
 
 
+class VWAPOverlay(BaseOverlay):
+    def __init__(self, color="blue", show=True):
+        self.color = color
+        self.show = show
+
+    def compute(self, df):
+        """Add VWAP column to df"""
+        if "Volume" not in df.columns:
+            raise ValueError("VWAP requires 'Volume' column in DataFrame")
+
+        # Typical price
+        typical_price = (df["High"] + df["Low"] + df["Close"]) / 3
+
+        # Cumulative calculations
+        df["Cum_TPV"] = (typical_price * df["Volume"]).cumsum()
+        df["Cum_Vol"] = df["Volume"].cumsum()
+
+        # VWAP
+        df["VWAP"] = df["Cum_TPV"] / df["Cum_Vol"]
+        return df
+
+    def plot(self, ax, df):
+        df = self.compute(df)
+        if self.show:
+            ax.plot(df.index, df["VWAP"], label="VWAP", color=self.color, linewidth=1.2)
 

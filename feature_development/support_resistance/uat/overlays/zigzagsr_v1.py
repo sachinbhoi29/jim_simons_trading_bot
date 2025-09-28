@@ -23,8 +23,11 @@ class ZigzagSR:
 
     def __init__(self, min_peak_distance=5, min_peak_prominence=10, show_zigzag_line=True, show_peak_markers=True, show_trough_markers=True, show_support_resistance_zones=True,
                  zone_merge_tolerance=0.005, min_zone_points=3, max_zones=6, color_close="black", color_zigzag="blue", color_peaks="red",
-                 color_troughs="green", color_zone="orange", alpha_zone=0.25, max_zone_width_ratio=0.01, min_zone_width_ratio=0.001, show=True):
-        
+                 color_troughs="green", color_zone="orange", alpha_zone=0.25, max_zone_width_ratio=0.01, min_zone_width_ratio=0.001, show=True,
+                 show_fibo = True,show_trendline=True,show_only_latest_fibo=True):
+        self.show_only_latest_fibo = show_only_latest_fibo
+        self.show_trendline=show_trendline
+        self.show_fibo = show_fibo
         self.show = show
         self.max_zone_width_ratio = max_zone_width_ratio
         self.min_zone_width_ratio = min_zone_width_ratio
@@ -99,6 +102,72 @@ class ZigzagSR:
 
         return df
 
+    def compute_fib_levels(self, df, levels=None, min_move_pct=0.01):
+        """
+        Compute Fibonacci retracement levels for significant ZigZag legs only.
+
+        Parameters:
+        - df: DataFrame with 'Close'
+        - levels: list of Fibonacci levels (default [0,0.236,0.382,0.5,0.618,0.786,1])
+        - min_move_pct: minimum price change (%) to consider the leg significant
+        """
+        if levels is None:
+            levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]
+
+        fib_data = []
+        close = df["Close"].to_numpy().ravel()
+        for i in range(1, len(self.zigzag_idx)):
+            idx1, idx2 = self.zigzag_idx[i-1], self.zigzag_idx[i]
+            price1, price2 = close[idx1], close[idx2]
+
+            # Compute absolute and relative move
+            move = abs(price2 - price1)
+            move_pct = move / price1
+
+            if move_pct < min_move_pct:
+                continue  # skip insignificant moves
+
+            # Up leg
+            if price2 > price1:
+                fibs = {f"{int(l*100)}%": price2 - l*move for l in levels}
+            else:  # Down leg
+                fibs = {f"{int(l*100)}%": price2 + l*move for l in levels}
+
+            fib_data.append({
+                "start_idx": idx1, "end_idx": idx2,
+                "start_price": price1, "end_price": price2,
+                "fibs": fibs
+            })
+
+        self.fib_levels = fib_data
+        return fib_data
+
+
+    def plot_zigzag_midline(self, ax, df, zigzag_idx, close, color="magenta", linestyle="--", linewidth=2):
+        """
+        Plot slanted trendlines connecting the midpoints of each ZigZag leg.
+        """
+        if len(zigzag_idx) < 2:
+            return  # Not enough points
+
+        mid_x = []
+        mid_y = []
+
+        for i in range(1, len(zigzag_idx)):
+            idx1, idx2 = zigzag_idx[i-1], zigzag_idx[i]
+            price1, price2 = close[idx1], close[idx2]
+
+            # Midpoint
+            x_mid = df.index[idx1] + (df.index[idx2] - df.index[idx1]) / 2
+            y_mid = (price1 + price2) / 2
+
+            mid_x.append(x_mid)
+            mid_y.append(y_mid)
+
+        # Connect midpoints with slanted line
+        ax.plot(mid_x, mid_y, color=color, linestyle=linestyle, linewidth=linewidth, label="_nolegend_")
+
+
     def plot(self, ax, df):
         if not self.show:
             return df
@@ -119,3 +188,32 @@ class ZigzagSR:
             for i, (low, high, strength) in enumerate(self.zones, 1):
                 ax.axhspan(low, high, color=self.color_zone, alpha=self.alpha_zone)
                 ax.text(df.index[0], (low + high) / 2, f"Z{i} ({strength})", color="brown", va="center", fontsize=8)
+
+        # --- Fib plotting ---
+        if self.show_fibo:
+            fib_data = self.compute_fib_levels(df)
+            for fib_leg in fib_data:
+                if self.show_only_latest_fibo:
+                    fib_leg = fib_data[-1]  # pick the last leg
+                idx1, idx2 = fib_leg["start_idx"], fib_leg["end_idx"]
+                for label, price in fib_leg["fibs"].items():
+                    ax.hlines(price, df.index[idx1], df.index[idx2],
+                            colors="purple", linestyles="dotted", linewidth=1)
+                    ax.text(df.index[idx2], price, f"{label}", fontsize=7,
+                            color="purple", va="center")
+        
+        # --- Fib plotting (only latest leg) ---
+        if self.show_only_latest_fibo:
+            fib_data = self.compute_fib_levels(df)
+            if fib_data:  # make sure there is at least one leg
+                fib_leg = fib_data[-1]  # pick the last leg
+                idx1, idx2 = fib_leg["start_idx"], fib_leg["end_idx"]
+                for label, price in fib_leg["fibs"].items():
+                    ax.hlines(price, df.index[idx1], df.index[idx2],
+                            colors="purple", linestyles="dotted", linewidth=1)
+                    ax.text(df.index[idx2], price, f"{label}", fontsize=7,
+                            color="purple", va="center")
+
+        # --- Trendline plotting ---
+        if self.show_trendline:
+            self.plot_zigzag_midline(ax, df, self.zigzag_idx, df["Close"].to_numpy(), color="magenta", linestyle="--", linewidth=2)
