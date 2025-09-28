@@ -41,7 +41,7 @@ class CandlestickChart:
     def add_subplot(self, overlay, height_ratio=1):
         self.subplots.append((overlay, height_ratio))
 
-    def plot(self):
+    def plot(self,save_path=False):
         df = self.df.reset_index()
         df['Date'] = df['Date'].map(mdates.date2num)
         ohlc = df[['Date', 'Open', 'High', 'Low', 'Close']].values
@@ -89,7 +89,11 @@ class CandlestickChart:
             ax.legend()
 
         plt.tight_layout()
-        plt.show()
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
+        else:
+            plt.show()
+
 
 
 
