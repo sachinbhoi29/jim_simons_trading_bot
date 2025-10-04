@@ -293,3 +293,5 @@ class VWAPOverlay(BaseOverlay):
         if self.show:
             ax.plot(df.index, df["VWAP"], label="VWAP", color=self.color, linewidth=1.2)
 
+
+
