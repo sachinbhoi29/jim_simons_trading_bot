@@ -195,17 +195,17 @@ class FibonacciOverlay(BaseOverlay):
         swing_high = df.loc[swing_high_idx, "High"]
         swing_low = df.loc[swing_low_idx, "Low"]
 
-        if swing_low_idx > swing_high_idx:
-            swing_low_idx, swing_high_idx = swing_high_idx, swing_low_idx
-            swing_low, swing_high = swing_high, swing_low
+        # if swing_low_idx > swing_high_idx:
+        #     swing_low_idx, swing_high_idx = swing_high_idx, swing_low_idx
+        #     swing_low, swing_high = swing_high, swing_low
 
+        # Always make 0% = low and 100% = high (top always 100%)
         self.x1 = swing_low_idx
         self.x2 = swing_high_idx
 
-        # Fibonacci levels
         self.levels_dict = {}
         for level in self.levels:
-            price = swing_high - (swing_high - swing_low) * level
+            price = swing_low + (swing_high - swing_low) * level
             self.levels_dict[f"{int(level * 100)}%"] = price
 
         # Last close analysis

@@ -30,7 +30,7 @@ class ChartPipeline:
         chart.add_overlay(EnhancedRegimeOverlay(show=True))
         chart.plot()
 
-    def fibpercent(self, tickers, fib_level_filter=[50, 65], period="1y"):
+    def fibpercent(self, tickers, fib_level_filter=[50, 65], period="6mo"): # 1y, 6mo
         """
         Only save charts and data for tickers whose last price is within fib_level_filter range.
         """
@@ -44,7 +44,7 @@ class ChartPipeline:
             # Ensure Date is index
             df.index = pd.to_datetime(df.index)
             df.sort_index(inplace=True)
-            print(df.head())
+            # print(df.head())
             chart = CandlestickChart(df, ticker=ticker, show_candles=True, show=True)
             chart.add_overlay(EMAOverlay(window=50, color="red", show=True))
             chart.add_overlay(EMAOverlay(window=20, color="green", show=True))
