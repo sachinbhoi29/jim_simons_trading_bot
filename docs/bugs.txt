@@ -1,0 +1,8 @@
+
+Bugs:
+
+
+
+Bug Fixes:
+The fibo shows from both the tends, sometimes the top is 100% while other times it is 0%
+
