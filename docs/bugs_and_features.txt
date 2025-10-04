@@ -1,0 +1,12 @@
+
+Bugs:
+
+
+
+Bug Fixes:
+The fibo shows from both the tends, sometimes the top is 100% while other times it is 0%
+
+
+
+Featrues:
+If the trade is non directional for n number of days, and if it is not in much loss or profit, cut it off
