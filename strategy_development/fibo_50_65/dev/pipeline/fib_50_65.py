@@ -59,11 +59,12 @@ class ChartPipeline:
             df = chart.only_df()
             fib_info = last_price_fib_info(df)
             fib_percent = fib_info["fib_percent"]
+            fib_percent = round(fib_percent, 2)
             if fib_level_filter[0] <= fib_percent <= fib_level_filter[1]:
                 print(f"{ticker}: last price is at {fib_percent:.2f}% Fib — saving chart & data")
                 df_to_save = chart.only_df()
                 df_to_save.to_csv(f"{self.data_dir}/{ticker}_data.csv")
-                chart.plot(f'strategy_development/fibo_50_65/dev/charts/{ticker}.png')
+                chart.plot(f'strategy_development/fibo_50_65/dev/charts/{ticker}_{fib_percent}.png')
             else:
                 print(f"{ticker}: last price at {fib_percent:.2f}% Fib — skipped")
 
