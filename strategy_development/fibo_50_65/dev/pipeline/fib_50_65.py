@@ -28,7 +28,7 @@ class ChartPipeline:
         chart.add_overlay(EnhancedRegimeOverlay(show=True))
         chart.plot()
 
-    def fibpercent(self, tickers, fib_level_filter=[50, 65], period="1y"):
+    def fibpercent(self, tickers, fib_level_filter=[50, 65], period="6mo"): # 1y, 6mo
         """
         Only save charts and data for tickers whose last price is within fib_level_filter range.
         """
@@ -42,7 +42,7 @@ class ChartPipeline:
             # Ensure Date is index
             df.index = pd.to_datetime(df.index)
             df.sort_index(inplace=True)
-            print(df.head())
+            # print(df.head())
             chart = CandlestickChart(df, ticker=ticker, show_candles=True, show=True)
             chart.add_overlay(EMAOverlay(window=50, color="red", show=True))
             chart.add_overlay(EMAOverlay(window=20, color="green", show=True))
@@ -57,11 +57,12 @@ class ChartPipeline:
             df = chart.only_df()
             fib_info = last_price_fib_info(df)
             fib_percent = fib_info["fib_percent"]
+            fib_percent = round(fib_percent, 2)
             if fib_level_filter[0] <= fib_percent <= fib_level_filter[1]:
                 print(f"{ticker}: last price is at {fib_percent:.2f}% Fib — saving chart & data")
                 df_to_save = chart.only_df()
                 df_to_save.to_csv(f"{self.data_dir}/{ticker}_data.csv")
-                chart.plot(f'strategy_development/fibo_50_65/dev/charts/{ticker}.png')
+                chart.plot(f'strategy_development/fibo_50_65/dev/charts/{ticker}_{fib_percent}.png')
             else:
                 print(f"{ticker}: last price at {fib_percent:.2f}% Fib — skipped")
 
