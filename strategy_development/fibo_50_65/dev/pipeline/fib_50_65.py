@@ -11,8 +11,6 @@ from overlays.regime_detection_v1 import EnhancedRegimeOverlay
 from get_data.yfinance_multistock_data import download_and_split
 from utilities.fib_utils import last_price_fib_info
 
-
-
 class ChartPipeline:
     def __init__(self, data_dir="strategy_development/fibo_50_65/dev/data",
                        chart_dir="strategy_development/fibo_50_65/dev/charts"):
