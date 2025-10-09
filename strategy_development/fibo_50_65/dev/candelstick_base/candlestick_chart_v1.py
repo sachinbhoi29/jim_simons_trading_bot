@@ -41,6 +41,22 @@ class CandlestickChart:
     def add_subplot(self, overlay, height_ratio=1):
         self.subplots.append((overlay, height_ratio))
 
+    def add_text(self, text, x=0.01, y=0.99, fontsize=10, color='black', bbox=True):
+        """
+        Store text annotation to be plotted on chart.
+        x, y are in axes fraction (0-1).
+        """
+        self.note_text_info = {
+            "text": text,
+            "x": x,
+            "y": y,
+            "fontsize": fontsize,
+            "color": color,
+            "bbox": bbox
+        }
+
+
+
     def plot(self,save_path=False):
         df = self.df.reset_index()
         df['Date'] = df['Date'].map(mdates.date2num)
@@ -71,6 +87,19 @@ class CandlestickChart:
 
         for overlay in self.overlays:
             overlay.plot(ax_main, self.df)
+
+        # --- Add text annotation if exists ---
+        if hasattr(self, "note_text_info"):
+            info = self.note_text_info
+            bbox_props = dict(facecolor='yellow', alpha=0.4, boxstyle='round,pad=0.3') if info['bbox'] else None
+            ax_main.text(
+                info['x'], info['y'], info['text'],
+                transform=ax_main.transAxes,
+                fontsize=info['fontsize'],
+                color=info['color'],
+                verticalalignment='top',
+                bbox=bbox_props
+            )
 
         ax_main.xaxis_date()
         ax_main.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))

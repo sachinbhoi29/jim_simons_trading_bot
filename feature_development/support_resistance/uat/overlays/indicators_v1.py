@@ -200,12 +200,13 @@ class FibonacciOverlay(BaseOverlay):
         #     swing_low, swing_high = swing_high, swing_low
 
         # Always make 0% = low and 100% = high (top always 100%)
-        self.x1 = swing_low_idx
-        self.x2 = swing_high_idx
+        self.x1 = swing_high_idx
+        self.x2 = swing_low_idx
 
+        # Flip: 0% = high, 100% = low
         self.levels_dict = {}
         for level in self.levels:
-            price = swing_low + (swing_high - swing_low) * level
+            price = swing_high - (swing_high - swing_low) * level
             self.levels_dict[f"{int(level * 100)}%"] = price
 
         # Last close analysis
