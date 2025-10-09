@@ -12,12 +12,24 @@ from get_data.yfinance_multistock_data import download_and_split
 from utilities.fib_utils import last_price_fib_info
 
 class ChartPipeline:
-    def __init__(self, data_dir="strategy_development/fibo_50_65/dev/data",
-                       chart_dir="strategy_development/fibo_50_65/dev/charts"):
+    def __init__(self, data_dir="strategy_development/fibo_strategies/dev/data",
+                       chart_dir="strategy_development/fibo_strategies/dev/charts"):
         self.data_dir = data_dir
         self.chart_dir = chart_dir
         os.makedirs(self.data_dir, exist_ok=True)
         os.makedirs(self.chart_dir, exist_ok=True)
+
+    def plot(self, ticker, period=None, start=None, end=None, overlay=True):
+        """
+            Plot charts for given tickers and save them.
+            This function is designed specifically for index plotting.
+        """
+        if period is None and (start is None or end is None):
+            period = "1y"
+        df = yf.download(ticker, period=period,start=start,end=end, interval="1d", auto_adjust=False, multi_level_index=False)
+        chart = CandlestickChart(df, ticker=ticker, show_candles=True,show=True)
+        chart.add_overlay(EnhancedRegimeOverlay(show=True))
+        chart.plot()
 
     def strategy_1(self, tickers, fib_level_filter=[50, 65], start=None, end=None, period=None):  # 1y, 6mo
         """
@@ -41,7 +53,7 @@ class ChartPipeline:
             # Add indicators
             chart.add_overlay(EMAOverlay(window=50, color="red", show=True))
             chart.add_overlay(EMAOverlay(window=20, color="green", show=True))
-            chart.add_overlay(FibonacciOverlay(lookback=50, show=True))
+            chart.add_overlay(FibonacciOverlay(lookback=30, show=True))
             zigzag = ZigzagSR(
                 min_peak_distance=8, min_peak_prominence=10,
                 zone_merge_tolerance=0.007, max_zones=8,
@@ -141,7 +153,7 @@ class ChartPipeline:
             # Add indicators
             chart.add_overlay(EMAOverlay(window=50, color="red", show=True))
             chart.add_overlay(EMAOverlay(window=20, color="green", show=True))
-            chart.add_overlay(FibonacciOverlay(lookback=50, show=True))
+            chart.add_overlay(FibonacciOverlay(lookback=30, show=True))
             chart.add_subplot(RSIOverlay(period=14), height_ratio=1)
             chart.add_subplot(VolumeOverlay(), height_ratio=1)
             chart.add_overlay(ZigzagSR(min_peak_distance=8, min_peak_prominence=10,
@@ -193,6 +205,65 @@ class ChartPipeline:
             else:
                 print(f"{ticker}: last price at {fib_percent}% Fib — skipped")
 
+
+    def strategy_3(self, tickers, start=None, end=None, period=None):
+        dfs = download_and_split(tickers, start=start, end=end, period=period)
+
+        for ticker, df in dfs.items():
+            if df.empty or df.isna().all().all():
+                print(f"{ticker} returned empty or invalid data — skipped")
+                continue
+
+            df.columns.name = None
+            df.index = pd.to_datetime(df.index)
+            df.sort_index(inplace=True)
+
+            # Create chart and add overlays (this also calculates indicator columns)
+            chart = CandlestickChart(df, ticker=ticker, show_candles=True, show=True)
+            chart.add_overlay(EMAOverlay(window=20, color="green", show=True))
+            chart.add_overlay(EMAOverlay(window=50, color="red", show=True))
+            chart.add_overlay(FibonacciOverlay(lookback=30, show=True))
+            chart.add_overlay(VWAPOverlay(show=True))
+            chart.add_subplot(RSIOverlay(period=14), height_ratio=1)
+            chart.add_subplot(VolumeOverlay(), height_ratio=1)
+            chart.add_overlay(ZigzagSR(
+                min_peak_distance=8, min_peak_prominence=10,
+                zone_merge_tolerance=0.007, max_zones=8,
+                color_zone="green", alpha_zone=0.1,
+                show=True, show_fibo=False, show_trendline=True,
+                show_only_latest_fibo=False))
+
+            # Get DataFrame with indicators
+            df = chart.only_df()
+
+            # Access indicators now
+            try:
+                fib_info = last_price_fib_info(df)
+                fib_percent = round(fib_info["fib_percent"], 2)
+                fibo_status = df.get("Fibo_Status_Last_Close", pd.Series(["N/A"])).iloc[-1]
+
+                ema20 = df["EMA_20"].iloc[-1]
+                ema50 = df["EMA_50"].iloc[-1]
+                rsi = df["RSI_14"].iloc[-1]
+                vwap = df["VWAP"].iloc[-1]
+                close = df["Close"].iloc[-1]
+                vol = df["Volume"].iloc[-1]
+                avg_vol = df["Volume"].rolling(20).mean().iloc[-1]
+            except Exception as e:
+                print(f"{ticker}: Failed to parse indicators — {e}")
+                continue
+
+            # Filter based on strategy conditions
+            if ema20 > ema50 and 40 < rsi < 60 and close > vwap and vol > avg_vol:
+                print(f"{ticker}: High-Quality Setup Found")
+
+                # Add overlays for plotting with show=True now
+                chart.add_text(
+                    f"Fib%: {fib_percent}%\nEMA: Bullish\nRSI: {rsi:.1f} (Neutral)\nVWAP: Reclaimed\nVolume: High ({vol:.0f})"
+                )
+                chart.plot(save_path=f"{self.chart_dir}/{ticker}_strategy3.png")
+            else:
+                print(f"{ticker}: Does not meet high-quality criteria — skipped")
 
 
 
