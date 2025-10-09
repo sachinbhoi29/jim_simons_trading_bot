@@ -8,7 +8,7 @@ import numpy as np
 # Step 1: Load and Clean Data
 # ------------------------------
 
-df = pd.read_csv("feature_development/news_trading_bot/prod/stock_news_20250927_0915.csv")
+df = pd.read_csv("C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/feature_development/news_trading_bot/prod/stock_news_20251009_0915.csv")
 df = df.dropna(subset=["title", "stock"])
 
 def clean_text(text):
@@ -44,10 +44,10 @@ df['sentiment_score'] = df['clean_title'].apply(get_sentiment_score)
 # ------------------------------
 
 category_keywords = {
-    "earnings": [
-        "quarterly results", "q1 results", "q2 results", "q3 results", "q4 results", "quarterly ",
+    "quarterly_earnings": ["quarterly results","q1 results", "q2 results", "q3 results", "q4 results", "quarterly ",
         "q1 ", "q2 ", "q3 ", "q4 ", "q1:", "q2:", "q3:", "q4:",
-        "quarterly earnings", "net profit", "revenue", "ebitda", "eps", "financial results",
+        "quarterly earnings"],
+    "earnings": [ "net profit", "revenue", "ebitda", "eps", "financial results",
         "topline", "bottomline", "q1fy", "q2fy", "q3fy", "q4fy", "fy2025", "fy25"
     ],
     "ipo": [
@@ -65,6 +65,7 @@ category_keywords = {
 }
 
 category_weights = {
+    "quarterly_earnings":5.0
     "earnings": 1.5,
     "ipo": 1.3,
     "regulation": 1.2,
@@ -91,7 +92,7 @@ df['weighted_score'] = df['sentiment_score'] * df['weight']
 # Step 4: Export Per-Article Sentiment
 # ------------------------------
 
-df.to_csv("feature_development/news_trading_bot/prod/sentiment_per_news.csv", index=False)
+df.to_csv("C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/feature_development/news_trading_bot/prod/sentiment_per_news.csv", index=False)
 print("✅ Saved per-news sentiment with category/weight: sentiment_per_news.csv")
 
 # ------------------------------
@@ -120,5 +121,5 @@ grouped_df["avg_weight"] = grouped_df["avg_weight"].round(2)
 # Step 6: Save Aggregated Results
 # ------------------------------
 
-grouped_df.to_csv("feature_development/news_trading_bot/prod/sentiment_by_stock.csv", index=False)
+grouped_df.to_csv("C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/feature_development/news_trading_bot/prod/sentiment_by_stock.csv", index=False)
 print("✅ Saved grouped sentiment: sentiment_by_stock.csv")

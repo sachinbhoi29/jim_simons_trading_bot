@@ -200,14 +200,14 @@ class FibonacciOverlay(BaseOverlay):
         #     swing_low, swing_high = swing_high, swing_low
 
         # Always make 0% = low and 100% = high (top always 100%)
-        self.x1 = swing_low_idx
-        self.x2 = swing_high_idx
+        self.x1 = swing_high_idx
+        self.x2 = swing_low_idx
 
+        # Flip: 0% = high, 100% = low
         self.levels_dict = {}
         for level in self.levels:
-            price = swing_low + (swing_high - swing_low) * level
+            price = swing_high - (swing_high - swing_low) * level
             self.levels_dict[f"{int(level * 100)}%"] = price
-
 
         # Last close analysis
         last_close = df["Close"].iloc[-1]
@@ -261,6 +261,7 @@ class FibonacciOverlay(BaseOverlay):
 
         y_offset = (df["High"].max() - df["Low"].min()) * 0.02  # 1% of price range
         ax.text(x_pos, last_close + y_offset, f" {closest_level}", color='black', fontsize=20, va="bottom", ha="center")
+
 
 
 class VWAPOverlay(BaseOverlay):

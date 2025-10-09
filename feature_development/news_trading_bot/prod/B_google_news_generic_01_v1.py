@@ -132,8 +132,8 @@ def save_to_csv(news_items, filename):
 # -------------------------
 if __name__ == "__main__":
     # Define date and time window
-    start_date = datetime(2025, 9, 26)
-    end_date = datetime(2025, 9, 27)
+    start_date = datetime(2025, 10, 8)
+    end_date = datetime(2025, 10, 9)
     start_time = time(15, 15)
     end_time = time(9, 15)
 
@@ -150,7 +150,7 @@ if __name__ == "__main__":
         df['published'] = df['published'].dt.strftime("%Y-%m-%d %H:%M:%S %Z")
 
         date_str = f"{start_dt.strftime('%Y%m%d_%H%M')}_to_{end_dt.strftime('%Y%m%d_%H%M')}"
-        filename = f"feature_development/news_trading_bot/prod/news_market_combined_{date_str}.csv"
+        filename = f"C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/feature_development/news_trading_bot/prod/news_market_combined_{date_str}.csv"
         df.to_csv(filename, index=False, encoding='utf-8')
         print(f"\n📁 News saved to file: {filename}")
     else:

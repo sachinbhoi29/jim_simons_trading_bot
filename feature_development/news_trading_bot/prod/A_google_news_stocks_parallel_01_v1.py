@@ -179,7 +179,7 @@ def save_to_csv(news_items, filename):
 def very_important_news(df,date_str):
     pattern = re.compile("|".join([re.escape(k) for k in earnings_keywords]), re.IGNORECASE)
     df_earnings = df[df['title'].str.contains(pattern) | df['summary'].str.contains(pattern)]
-    earnings_filename = f"feature_development/news_trading_bot/prod/stock_news_earnings_{date_str}.csv"
+    earnings_filename = f"C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/feature_development/news_trading_bot/prod/stock_news_earnings_{date_str}.csv"
     df_earnings.to_csv(earnings_filename, index=False, encoding='utf-8')
     print(f"Saved earnings-related news to {earnings_filename}")
 
@@ -189,8 +189,8 @@ if __name__ == "__main__":
     # start_dt = end_dt - timedelta(days=1)
 
     # Define dates
-    start_date = datetime(2025, 9, 26)
-    end_date = datetime(2025, 9, 27)
+    start_date = datetime(2025, 10, 8)
+    end_date = datetime(2025, 10, 9)
     # Define time of day (e.g., 09:15 AM)
     start_time_of_day = time(15, 15)
     end_time_of_day = time(9, 15)
@@ -225,7 +225,7 @@ if __name__ == "__main__":
 
         date_str = end_dt.strftime("%Y%m%d_%H%M")
         very_important_news(df,date_str)
-        filename = f"feature_development/news_trading_bot/prod/stock_news_{date_str}.csv"
+        filename = f"C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/feature_development/news_trading_bot/prod/stock_news_{date_str}.csv"
         df.to_csv(filename, index=False, encoding='utf-8')
         print(f"Saved news items to {filename}")
     else:
