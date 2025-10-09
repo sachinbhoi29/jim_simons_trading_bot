@@ -5,8 +5,8 @@ if __name__ == '__main__':
     # Create a singleton instance for convenience
     pipeline = ChartPipeline()
     # Plot NIFTY and BANKNIFTY
-    # pipeline.plot("^NSEI")
-    # pipeline.plot(["^NSEBANK"])
+    pipeline.plot("^NSEI")
+    pipeline.plot(["^NSEBANK"])
 
     # # Filter tickers by Fib percent and save only if in 50-65%
     # tickers = ["RELIANCE.NS", "TCS.NS"]
@@ -14,4 +14,4 @@ if __name__ == '__main__':
     # fib_level_filter = [40, 60]
     # pipeline.strategy_1(tickers, fib_level_filter=fib_level_filter,start="2024-10-01",end="2025-05-01")
     fib_level_filter = [50, 61]
-    pipeline.strategy_2(tickers, fib_level_filter=fib_level_filter,start="2024-10-01",end="2025-05-01")
+    pipeline.strategy_2(tickers, fib_level_filter=fib_level_filter,start="2024-02-01",end="2024-07-03")
