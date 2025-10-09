@@ -246,25 +246,22 @@ class FibonacciOverlay(BaseOverlay):
         if not self.show or not self.levels_dict or self.x1 is None or self.x2 is None:
             return
 
-        # Plot Fibonacci levels
         for i, (label, price) in enumerate(self.levels_dict.items()):
             color = self.colors[i % len(self.colors)]
             linestyle = self.linestyles[i % len(self.linestyles)]
             ax.plot([self.x1, self.x2], [price, price], color=color, linestyle=linestyle, label=f"{label} - {price:.2f}")
             ax.text(self.x2, price, f"{label}: {price:.2f}", color=color, fontsize=8, ha="left", va="center")
 
-        # Last close as a star
         last_close = df["Close"].iloc[-1]
         distances = {k: abs(last_close - v) for k, v in self.levels_dict.items()}
         closest_level = min(distances, key=distances.get)
 
-        # Place star right above the last candle
         x_pos = df.index[-1]  # last candle
         ax.scatter(x_pos, last_close, marker='*', color='black', s=100, zorder=5)
 
-        # Label slightly above/right of the star for space
         y_offset = (df["High"].max() - df["Low"].min()) * 0.02  # 1% of price range
         ax.text(x_pos, last_close + y_offset, f" {closest_level}", color='black', fontsize=20, va="bottom", ha="center")
+
 
 
 class VWAPOverlay(BaseOverlay):

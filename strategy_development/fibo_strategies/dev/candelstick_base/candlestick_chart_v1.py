@@ -55,8 +55,6 @@ class CandlestickChart:
             "bbox": bbox
         }
 
-
-
     def plot(self,save_path=False):
         df = self.df.reset_index()
         df['Date'] = df['Date'].map(mdates.date2num)
