@@ -230,7 +230,7 @@ class genericStrategyPipeline:
 
 if __name__ == "__main__":
     # Create a singleton instance for convenience
-    pipeline = ChartPipeline()
+    pipeline = genericStrategyPipeline()
     # Plot NIFTY and BANKNIFTY
     pipeline.plot(["^NSEI"])
     pipeline.plot(["^NSEBANK"])
