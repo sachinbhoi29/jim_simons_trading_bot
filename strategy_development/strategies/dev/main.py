@@ -35,5 +35,5 @@ if __name__ == '__main__':
     # fib_level_filter = [50, 61]
     # pipeline.strategy_2(tickers, fib_level_filter=fib_level_filter,start="2024-06-01",end="2024-10-12")
     # gen_pipeline.trend_fibo_conf_strategy(tickers,start="2024-06-01",end="2024-09-02")
-    # gen_pipeline.multi_confluence_strategy(tickers,start="2024-06-01",end="2024-09-02")
+    gen_pipeline.multi_confluence_strategy(tickers,start="2024-06-01",end="2024-09-02")
     gen_pipeline.strategy_volume_burst(tickers,start="2024-06-01",end="2024-09-02")
