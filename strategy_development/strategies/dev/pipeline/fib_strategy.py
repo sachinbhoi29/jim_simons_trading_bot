@@ -12,8 +12,8 @@ from get_data.yfinance_multistock_data import download_and_split
 from utilities.fib_utils import last_price_fib_info
 
 class fibPipeline:
-    def __init__(self, data_dir="strategy_development/fibo_strategies/dev/data",
-                       chart_dir="strategy_development/fibo_strategies/dev/charts"):
+    def __init__(self, data_dir="strategy_development/strategies/dev/data",
+                       chart_dir="strategy_development/strategies/dev/charts"):
         self.data_dir = data_dir
         self.chart_dir = chart_dir
         os.makedirs(self.data_dir, exist_ok=True)
