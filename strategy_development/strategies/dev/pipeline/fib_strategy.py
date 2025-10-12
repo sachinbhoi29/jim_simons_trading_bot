@@ -4,7 +4,7 @@ import yfinance as yf
 import pandas as pd
 import os
 from candelstick_base.candlestick_chart_v1 import CandlestickChart
-from overlays.indicators_v1 import MovingAverageOverlay, RSIOverlay,VolumeOverlay,MACDOverlay,BollingerBandsOverlay,StochasticOscillatorOverlay,ATROverlay,EMAOverlay,FibonacciOverlay,VWAPOverlay
+from overlays.indicators_v1 import MovingAverageOverlay, RSIOverlay,VolumeOverlay,MACDOverlay,BollingerBandsOverlay,StochasticOscillatorOverlay,ATROverlay,EMAOverlay,FibonacciOverlay,VWAPOverlay,FibonacciOverlayImproved
 # from overlays.support_resistance import SupportResistanceZones # added in zigzagsr
 from overlays.zigzagsr_v1 import ZigzagSR
 from overlays.regime_detection_v1 import EnhancedRegimeOverlay
@@ -153,7 +153,8 @@ class fibPipeline:
             # Add indicators
             chart.add_overlay(EMAOverlay(window=50, color="red", show=True))
             chart.add_overlay(EMAOverlay(window=20, color="green", show=True))
-            chart.add_overlay(FibonacciOverlay(lookback=30, show=True))
+            # chart.add_overlay(FibonacciOverlay(lookback=35, show=True))
+            chart.add_overlay(FibonacciOverlayImproved(show=True))
             chart.add_subplot(RSIOverlay(period=14), height_ratio=1)
             chart.add_subplot(VolumeOverlay(), height_ratio=1)
             chart.add_overlay(ZigzagSR(min_peak_distance=8, min_peak_prominence=10,
