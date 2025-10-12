@@ -1,9 +1,11 @@
-from pipeline.fib_strategy import ChartPipeline
+from pipeline.fib_strategy import fibPipeline
+from pipeline.generic_strategy import genericStrategyPipeline
 
 
 if __name__ == '__main__':
     # Create a singleton instance for convenience
-    pipeline = ChartPipeline()
+    fib_pipeline = fibPipeline()
+    gen_pipeline = genericStrategyPipeline()
     # Plot NIFTY and BANKNIFTY
     # pipeline.plot("^NSEI",start='2024-01-01',end='2025-01-01')
     # pipeline.plot(["^NSEBANK"])
@@ -30,6 +32,8 @@ if __name__ == '__main__':
 
     # fib_level_filter = [40, 60]
     # pipeline.strategy_1(tickers, fib_level_filter=fib_level_filter,start="2024-10-01",end="2025-05-01")
-    fib_level_filter = [50, 61]
+    # fib_level_filter = [50, 61]
     # pipeline.strategy_2(tickers, fib_level_filter=fib_level_filter,start="2024-06-01",end="2024-10-12")
-    pipeline.strategy_3(tickers,start="2024-06-01",end="2024-09-02")
+    # gen_pipeline.trend_fibo_conf_strategy(tickers,start="2024-06-01",end="2024-09-02")
+    gen_pipeline.multi_confluence_strategy(tickers,start="2024-06-01",end="2024-09-02")
+    gen_pipeline.strategy_volume_burst(tickers,start="2024-06-01",end="2024-09-02")
