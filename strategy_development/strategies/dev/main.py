@@ -28,12 +28,18 @@ if __name__ == '__main__':
         "RECLTD.NS", "RELIANCE.NS", "SAIL.NS", "SBIN.NS", "SHREECEM.NS", "SUNPHARMA.NS",
         "SUNTV.NS", "TATACHEM.NS", "TATACONSUM.NS", "TATAMETALI.NS", "TATAMOTORS.NS",
         "TATAPOWER.NS", "TATASTEEL.NS", "TCS.NS", "TECHM.NS", "TITAN.NS", "TORNTPHARM.NS",
-        "UPL.NS", "ULTRACEMCO.NS", "ULTRATECH.NS", "WIPRO.NS"]
+        "UPL.NS", "ULTRACEMCO.NS", "ULTRATECH.NS", "WIPRO.NS",    "APOLLOHOSP.NS", 
+        "BRITANNIA.NS","HEROMOTOCO.NS","SBILIFE.NS","POLYCAB.NS", "BATAINDIA.NS",
+        "BALKRISIND.NS", "COROMANDEL.NS", "ACC.NS", "VOLTRONIC.NS", "TVSMOTOR.NS", 
+        "JINDALSAW.NS", "CUMMINSIND.NS", "GODREJIND.NS""ABFRL.NS", "ABCAPITAL.NS", 
+        "ALKEM.NS", "APLAPOLLO.NS", "ACC.NS", "BATAINDIA.NS", "BANKINDIA.NS", 
+        "ASHOKLEY.NS", "ASTRAL.NS", "VOLTA.NS", "SUZLON.NS", "CUMMINSIND.NS", "COFORGE.NS", 
+        "PERSISTENT.NS", "INDHOTEL.NS", "PBFINTECH.NS", "DLF.NS", "IPCA.NS", "TATACHEM.NS"]
 
     # fib_level_filter = [40, 60]
     # pipeline.strategy_1(tickers, fib_level_filter=fib_level_filter,start="2024-10-01",end="2025-05-01")
-    # fib_level_filter = [50, 61]
-    # pipeline.strategy_2(tickers, fib_level_filter=fib_level_filter,start="2024-06-01",end="2024-10-12")
+    fib_level_filter = [50, 61]
+    fib_pipeline.strategy_2(tickers, fib_level_filter=fib_level_filter,start="2024-06-01",end="2024-11-12")
     # gen_pipeline.trend_fibo_conf_strategy(tickers,start="2024-06-01",end="2024-09-02")
-    gen_pipeline.multi_confluence_strategy(tickers,start="2024-06-01",end="2024-09-02")
+    # gen_pipeline.multi_confluence_strategy(tickers,start="2024-06-01",end="2024-09-02")
     # gen_pipeline.strategy_volume_burst(tickers,start="2024-06-01",end="2024-09-02")
