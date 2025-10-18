@@ -4,7 +4,7 @@ import yfinance as yf
 import pandas as pd
 import os
 from candelstick_base.candlestick_chart_v1 import CandlestickChart
-from overlays.indicators_v1 import MovingAverageOverlay, RSIOverlay,VolumeOverlay,MACDOverlay,BollingerBandsOverlay,StochasticOscillatorOverlay,ATROverlay,EMAOverlay,FibonacciOverlay,VWAPOverlay
+from overlays.indicators_v1 import MovingAverageOverlay, RSIOverlay,VolumeOverlay,MACDOverlay,BollingerBandsOverlay,StochasticOscillatorOverlay,ATROverlay,EMAOverlay,FibonacciOverlay,VWAPOverlay,FibonacciOverlayImproved
 # from overlays.support_resistance import SupportResistanceZones # added in zigzagsr
 from overlays.zigzagsr_v1 import ZigzagSR
 from overlays.regime_detection_v1 import EnhancedRegimeOverlay
@@ -12,8 +12,8 @@ from get_data.yfinance_multistock_data import download_and_split
 from utilities.fib_utils import last_price_fib_info
 
 class fibPipeline:
-    def __init__(self, data_dir="strategy_development/fibo_strategies/dev/data",
-                       chart_dir="strategy_development/fibo_strategies/dev/charts"):
+    def __init__(self, data_dir="strategy_development/strategies/dev/data",
+                       chart_dir="strategy_development/strategies/dev/charts"):
         self.data_dir = data_dir
         self.chart_dir = chart_dir
         os.makedirs(self.data_dir, exist_ok=True)
@@ -79,7 +79,7 @@ class fibPipeline:
                 note_text = f"Fib%: {fib_percent:.2f}%\nStatus: {fibo_status}"
                 chart.add_text(
                     text=note_text,
-                    x=0.01,      # top-left corner
+                    x=1.00,      
                     y=0.99,
                     fontsize=12,
                     color="black",
@@ -153,7 +153,8 @@ class fibPipeline:
             # Add indicators
             chart.add_overlay(EMAOverlay(window=50, color="red", show=True))
             chart.add_overlay(EMAOverlay(window=20, color="green", show=True))
-            chart.add_overlay(FibonacciOverlay(lookback=30, show=True))
+            # chart.add_overlay(FibonacciOverlay(lookback=35, show=True))
+            chart.add_overlay(FibonacciOverlayImproved(show=True))
             chart.add_subplot(RSIOverlay(period=14), height_ratio=1)
             chart.add_subplot(VolumeOverlay(), height_ratio=1)
             chart.add_overlay(ZigzagSR(min_peak_distance=8, min_peak_prominence=10,
@@ -229,7 +230,7 @@ class fibPipeline:
             chart.add_overlay(ZigzagSR(
                 min_peak_distance=8, min_peak_prominence=10,
                 zone_merge_tolerance=0.007, max_zones=8,
-                color_zone="green", alpha_zone=0.1,
+                color_zone="green", alpha_zone=0.5,
                 show=True, show_fibo=False, show_trendline=True,
                 show_only_latest_fibo=False))
 
@@ -264,6 +265,78 @@ class fibPipeline:
                 chart.plot(save_path=f"{self.chart_dir}/{ticker}_strategy3.png")
             else:
                 print(f"{ticker}: Does not meet high-quality criteria — skipped")
+
+    def strategy_no_filter(self, tickers, start=None, end=None, period=None):
+        """
+        Screening Strategy:
+        -------------------
+        - No strict filters, just compute and show all indicators
+        - Annotates Fib%, EMA trend, RSI, Volume, VWAP, etc.
+        - You manually review the charts and decide.
+        """
+        dfs = download_and_split(tickers, start=start, end=end, period=period)
+
+        for ticker, df in dfs.items():
+            if df.empty or df.isna().all().all():
+                print(f"{ticker} returned empty or invalid data — skipped")
+                continue
+
+            df.columns.name = None
+            df.index = pd.to_datetime(df.index)
+            df.sort_index(inplace=True)
+
+            chart = CandlestickChart(df, ticker=ticker, show_candles=True, show=True)
+
+            # === Add commonly used overlays and indicators ===
+            chart.add_overlay(EMAOverlay(window=20, color="green", show=True))
+            chart.add_overlay(EMAOverlay(window=50, color="red", show=True))
+            chart.add_overlay(VWAPOverlay(show=True))
+            chart.add_overlay(FibonacciOverlay(lookback=30, show=True))
+            chart.add_overlay(ZigzagSR(
+                min_peak_distance=8, min_peak_prominence=10,
+                zone_merge_tolerance=0.007, max_zones=8,
+                color_zone="blue", alpha_zone=0.15,
+                show=True, show_fibo=False, show_trendline=True,
+                show_only_latest_fibo=False
+            ))
+            chart.add_subplot(RSIOverlay(period=14), height_ratio=1)
+            chart.add_subplot(VolumeOverlay(), height_ratio=1)
+
+            # Compute all overlays/subplots
+            df = chart.only_df()
+
+            # --- Calculate indicator summaries ---
+            fib_info = last_price_fib_info(df)
+            fib_percent = round(fib_info.get("fib_percent", 0), 2)
+            fibo_status = df.get("Fibo_Status_Last_Close", pd.Series(["N/A"])).iloc[-1]
+
+            ema20 = df["EMA_20"].iloc[-1]
+            ema50 = df["EMA_50"].iloc[-1]
+            ema_trend = "Bullish" if ema20 > ema50 else "Bearish"
+
+            rsi = df["RSI_14"].iloc[-1]
+            rsi_signal = "Oversold" if rsi < 40 else "Overbought" if rsi > 60 else "Neutral"
+
+            vwap = df["VWAP"].iloc[-1]
+            close = df["Close"].iloc[-1]
+            vol = df["Volume"].iloc[-1]
+            avg_vol = df["Volume"].rolling(20).mean().iloc[-1]
+            vol_signal = "High" if vol > avg_vol else "Low/Normal"
+
+            # --- Annotation text for easy reading ---
+            note_text = (
+                f"Fib%: {fib_percent}% ({fibo_status})\n"
+                f"EMA Trend: {ema_trend}\n"
+                f"RSI: {rsi:.1f} ({rsi_signal})\n"
+                f"VWAP: {'Above' if close > vwap else 'Below'}\n"
+                f"Volume: {vol_signal}"
+            )
+
+            chart.add_text(note_text, x=0.01, y=0.98, fontsize=11, color="black", bbox=True)
+
+            save_path = f"{self.chart_dir}/{ticker}_screen.png"
+            chart.plot(save_path=save_path)
+            print(f"Saved chart for {ticker} — Fib%: {fib_percent}%")
 
 
 

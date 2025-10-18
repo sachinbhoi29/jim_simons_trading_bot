@@ -97,7 +97,7 @@ SMALL_CAP_STOCKS = ["Laurus Labs", "Godfrey Phillips", "Delhivery", "Aster DM He
     "CSB Bank", "DCB Bank", "Repco Home Finance"
                 ]
 
-STOCKS = LARGE_CAP_STOCKS + MID_CAP_STOCKS +SMALL_CAP_STOCKS
+STOCKS = LARGE_CAP_STOCKS + MID_CAP_STOCKS #+SMALL_CAP_STOCKS
 
 # Base query template to customize per stock
 # BASE_QUERY_TEMPLATE = (
@@ -189,8 +189,8 @@ if __name__ == "__main__":
     # start_dt = end_dt - timedelta(days=1)
 
     # Define dates
-    start_date = datetime(2025, 10, 8)
-    end_date = datetime(2025, 10, 9)
+    start_date = datetime(2025, 10, 15)
+    end_date = datetime(2025, 10, 16)
     # Define time of day (e.g., 09:15 AM)
     start_time_of_day = time(15, 15)
     end_time_of_day = time(9, 15)

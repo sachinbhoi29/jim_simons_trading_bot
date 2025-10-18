@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
+import pandas as pd
 
 class BaseOverlay:
     def plot(self, ax, df):
@@ -264,6 +264,112 @@ class FibonacciOverlay(BaseOverlay):
 
         # Label slightly above/right of the star for space
         y_offset = (df["High"].max() - df["Low"].min()) * 0.01  # 1% of price range
+        ax.text(x_pos, last_close + y_offset, f" {closest_level}", color='black', fontsize=9, va="bottom", ha="center")
+
+
+class FibonacciOverlayImproved(BaseOverlay):
+    def __init__(self, depth=5, levels=None, colors=None, linestyles=None, show=True):
+        self.depth = depth  # depth for swing detection
+        self.levels = levels if levels is not None else [0.0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0]
+        self.show = show
+
+        self.colors = colors if colors is not None else plt.cm.viridis(np.linspace(0, 1, len(self.levels)))
+        self.linestyles = linestyles if linestyles is not None else ["--"] * len(self.levels)
+
+        self.levels_dict = {}
+        self.x1 = None
+        self.x2 = None
+
+    def detect_swings(self, df):
+        highs = df['High'].rolling(window=self.depth * 2 + 1, center=True).apply(lambda x: x[self.depth] == max(x), raw=True)
+        lows = df['Low'].rolling(window=self.depth * 2 + 1, center=True).apply(lambda x: x[self.depth] == min(x), raw=True)
+
+        swing_highs = df[highs == 1.0]
+        swing_lows = df[lows == 1.0]
+
+        return swing_highs, swing_lows
+
+    def compute(self, df):
+        if df.empty or len(df) < self.depth * 2 + 1:
+            return df
+
+        df = df.copy()
+        swing_highs, swing_lows = self.detect_swings(df)
+
+        if swing_highs.empty or swing_lows.empty:
+            return df
+
+        # Use the two most recent alternating swings (low then high or high then low)
+        last_swing_high = swing_highs.iloc[-1]
+        last_swing_low = swing_lows[swing_lows.index < last_swing_high.name].iloc[-1] \
+            if last_swing_high.name > swing_lows.index[0] else None
+
+        if last_swing_low is None:
+            last_swing_low = swing_lows.iloc[-1]
+            last_swing_high = swing_highs[swing_highs.index < last_swing_low.name].iloc[-1]
+
+        if last_swing_high.name < last_swing_low.name:
+            swing_high, swing_low = last_swing_low['High'], last_swing_high['Low']
+            idx_high, idx_low = last_swing_low.name, last_swing_high.name
+        else:
+            swing_high, swing_low = last_swing_high['High'], last_swing_low['Low']
+            idx_high, idx_low = last_swing_high.name, last_swing_low.name
+
+        self.x1, self.x2 = idx_high, idx_low
+
+        # Create levels
+        self.levels_dict = {}
+        for level in self.levels:
+            price = swing_high - (swing_high - swing_low) * level
+            self.levels_dict[f"{int(level * 100)}%"] = price
+
+        # Distance from last close
+        last_close = df["Close"].iloc[-1]
+        distances = {k: abs(last_close - v) for k, v in self.levels_dict.items()}
+        closest_level = min(distances, key=distances.get)
+        closest_price = self.levels_dict[closest_level]
+        percent_diff = 100 * (last_close - closest_price) / closest_price
+
+        if last_close < closest_price:
+            self.fibo_status = "approaching"
+        elif last_close > closest_price:
+            crossed_before = any(df["Close"].iloc[:-1] > closest_price)
+            self.fibo_status = "crossed then approaching" if crossed_before else "crossed"
+        else:
+            self.fibo_status = "at level"
+
+        # Store in object
+        self.fibo_nearest_level = closest_level
+        self.fibo_close_percent = round(percent_diff, 2)
+        self.fibo_actual_level = closest_price
+
+        # Store in DataFrame
+        df.loc[df.index[-1], "Fibo_Nearest_Level"] = closest_level
+        df.loc[df.index[-1], "Fibo_Percent_Offset"] = self.fibo_close_percent
+        df.loc[df.index[-1], "Fibo_Status_Last_Close"] = self.fibo_status
+
+        for label, price in self.levels_dict.items():
+            df.loc[df.index[-1], f"Fib_{label}"] = price
+
+        return df
+
+    def plot(self, ax, df):
+        if not self.show or not self.levels_dict or self.x1 is None or self.x2 is None:
+            return
+
+        for i, (label, price) in enumerate(self.levels_dict.items()):
+            color = self.colors[i % len(self.colors)]
+            linestyle = self.linestyles[i % len(self.linestyles)]
+            ax.plot([self.x1, self.x2], [price, price], color=color, linestyle=linestyle, label=f"{label} - {price:.2f}")
+            ax.text(self.x2, price, f"{label}: {price:.2f}", color=color, fontsize=8, ha="left", va="center")
+
+        last_close = df["Close"].iloc[-1]
+        distances = {k: abs(last_close - v) for k, v in self.levels_dict.items()}
+        closest_level = min(distances, key=distances.get)
+
+        x_pos = df.index[-1]
+        y_offset = (df["High"].max() - df["Low"].min()) * 0.01
+        ax.scatter(x_pos, last_close, marker='*', color='black', s=100, zorder=5)
         ax.text(x_pos, last_close + y_offset, f" {closest_level}", color='black', fontsize=9, va="bottom", ha="center")
 
 
