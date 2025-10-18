@@ -32,6 +32,196 @@ class genericStrategyPipeline:
         chart.plot()
 
 
+    def strategy_bullish_trend(self, tickers, start=None, end=None, period=None):
+        """
+        Bullish Regime Strategy:
+        Focus on trend continuation using EMA, MACD, VWAP, RSI, and Fibonacci confluence.
+        Ideal for NIFTY bullish or moderate uptrend phases.
+        """
+        dfs = download_and_split(tickers, start=start, end=end, period=period)
+
+        for ticker, df in dfs.items():
+            if df.empty or df.isna().all().all():
+                print(f"{ticker}: Skipped — no data.")
+                continue
+
+            df.index = pd.to_datetime(df.index)
+            df.sort_index(inplace=True)
+
+            chart = CandlestickChart(df, ticker=ticker, show_candles=True, show=True)
+            chart.add_overlay(EMAOverlay(window=20, color="green", show=True))
+            chart.add_overlay(EMAOverlay(window=50, color="red", show=True))
+            chart.add_subplot(MACDOverlay(show=True))
+            chart.add_overlay(VWAPOverlay(show=True))
+            chart.add_overlay(FibonacciOverlay(lookback=30, show=True))
+            chart.add_subplot(RSIOverlay(period=14), height_ratio=1)
+            chart.add_subplot(VolumeOverlay(), height_ratio=1)
+            chart.add_overlay(ZigzagSR(show=True))
+
+            df = chart.only_df()
+
+            try:
+                ema20, ema50 = df["EMA_20"].iloc[-1], df["EMA_50"].iloc[-1]
+                macd, macd_signal = df["MACD"].iloc[-1], df["MACD_signal"].iloc[-1]
+                rsi = df["RSI_14"].iloc[-1]
+                close, vwap = df["Close"].iloc[-1], df["VWAP"].iloc[-1]
+                vol, avg_vol = df["Volume"].iloc[-1], df["Volume"].rolling(20).mean().iloc[-1]
+                fib = last_price_fib_info(df)["fib_percent"]
+
+                if (ema20 > ema50 and macd > macd_signal and
+                    45 < rsi < 60 and close > vwap and vol > avg_vol and
+                    45 <= fib <= 61):
+                    print(f"{ticker}: ✅ Bullish continuation setup found (Fib {fib:.1f}%)")
+                    chart.add_text(f"Bullish Setup\nFib {fib:.1f}% | EMA Bullish | RSI {rsi:.1f}")
+                    chart.plot(save_path=f"{self.chart_dir}/{ticker}_bullish.png")
+                else:
+                    print(f"{ticker}: ❌ No bullish setup")
+            except Exception as e:
+                print(f"{ticker}: Indicator parse error — {e}")
+
+
+    def strategy_bearish_trend(self, tickers, start=None, end=None, period=None):
+        """
+        Bearish Regime Strategy:
+        Looks for short setups in a confirmed downtrend using EMA, MACD, RSI, VWAP, and Fib retracement.
+        """
+        dfs = download_and_split(tickers, start=start, end=end, period=period)
+        for ticker, df in dfs.items():
+            if df.empty or df.isna().all().all():
+                continue
+
+            df.index = pd.to_datetime(df.index)
+            df.sort_index(inplace=True)
+
+            chart = CandlestickChart(df, ticker=ticker, show_candles=True, show=True)
+            chart.add_overlay(EMAOverlay(window=20, color="red", show=True))
+            chart.add_overlay(EMAOverlay(window=50, color="blue", show=True))
+            chart.add_subplot(MACDOverlay(show=True))
+            chart.add_overlay(FibonacciOverlay(lookback=30, show=True))
+            chart.add_overlay(VWAPOverlay(show=True))
+            chart.add_subplot(RSIOverlay(period=14), height_ratio=1)
+            chart.add_subplot(VolumeOverlay(), height_ratio=1)
+            chart.add_overlay(ZigzagSR(show=True))
+
+            df = chart.only_df()
+
+            try:
+                ema20, ema50 = df["EMA_20"].iloc[-1], df["EMA_50"].iloc[-1]
+                macd, macd_signal = df["MACD"].iloc[-1], df["MACD_signal"].iloc[-1]
+                rsi = df["RSI_14"].iloc[-1]
+                close, vwap = df["Close"].iloc[-1], df["VWAP"].iloc[-1]
+                vol, avg_vol = df["Volume"].iloc[-1], df["Volume"].rolling(20).mean().iloc[-1]
+                fib = last_price_fib_info(df)["fib_percent"]
+
+                if (ema20 < ema50 and macd < macd_signal and
+                    40 < rsi < 55 and close < vwap and vol > avg_vol and
+                    38 <= fib <= 50):
+                    print(f"{ticker}: ⚠️ Bearish continuation setup found (Fib {fib:.1f}%)")
+                    chart.add_text(f"Bearish Setup\nFib {fib:.1f}% | EMA Bearish | RSI {rsi:.1f}")
+                    chart.plot(save_path=f"{self.chart_dir}/{ticker}_bearish.png")
+                else:
+                    print(f"{ticker}: ❌ No bearish setup")
+            except Exception as e:
+                print(f"{ticker}: Indicator parse error — {e}")
+
+    def strategy_neutral_breakout(self, tickers, start=None, end=None, period=None,
+                                bb_window=20, bb_num_std=2, volume_multiple=1.5, tolerance=0.02):
+        """
+        Neutral Regime Strategy:
+        Detects breakouts from low-volatility range using Bollinger Bands + Volume Burst.
+        
+        Parameters:
+            tickers: list of tickers
+            bb_window: Bollinger Bands window
+            bb_num_std: Number of standard deviations
+            volume_multiple: Multiplier for volume spike
+            tolerance: % distance from BB considered as soft breakout
+        """
+        dfs = download_and_split(tickers, start=start, end=end, period=period)
+
+        for ticker, df in dfs.items():
+            if df.empty or df.isna().all().all():
+                print(f"{ticker}: Skipped — no valid data")
+                continue
+
+            df.index = pd.to_datetime(df.index)
+            df.sort_index(inplace=True)
+
+            # Initialize chart and add overlays
+            chart = CandlestickChart(df, ticker=ticker, show_candles=True, show=True)
+            chart.add_overlay(BollingerBandsOverlay(window=bb_window, num_std=bb_num_std, show=True))
+            chart.add_subplot(VolumeOverlay(), height_ratio=1)
+            chart.add_overlay(EMAOverlay(window=20, color="green", show=True))
+            chart.add_overlay(EMAOverlay(window=50, color="red", show=True))
+
+            df = chart.only_df()
+
+            # Dynamic column names
+            bb_upper_col = f"BB_upper_{bb_window}"
+            bb_lower_col = f"BB_lower_{bb_window}"
+
+            close = df["Close"].iloc[-1]
+            vol = df["Volume"].iloc[-1]
+            avg_vol = df["Volume"].rolling(20).mean().iloc[-1]
+
+            # Debug print to see why tickers fail
+            print(f"{ticker} | Close: {close:.2f} | BB Upper: {df[bb_upper_col].iloc[-1]:.2f} | BB Lower: {df[bb_lower_col].iloc[-1]:.2f} | Vol: {vol} | AvgVol: {avg_vol:.0f}")
+
+            # Soft breakout: within tolerance distance of band
+            soft_breakout = (
+                (close >= df[bb_upper_col].iloc[-1] * (1 - tolerance)) or
+                (close <= df[bb_lower_col].iloc[-1] * (1 + tolerance))
+            )
+
+            # Breakout condition: soft breakout + moderate volume spike
+            breakout_condition = soft_breakout and vol >= avg_vol * volume_multiple
+
+            if breakout_condition:
+                direction = "Bullish" if close > df[bb_upper_col].iloc[-1] else "Bearish"
+                print(f"{ticker}: 💥 {direction} breakout detected from range with volume spike")
+                chart.add_text(f"{direction} Range Breakout + Volume Spike")
+                chart.plot(save_path=f"{self.chart_dir}/{ticker}_neutral_breakout.png")
+            else:
+                print(f"{ticker}: ⚪ No breakout in neutral regime")
+
+
+
+    def strategy_high_volatility(self, tickers, start=None, end=None, period=None):
+        """
+        High Volatility Regime Strategy:
+        Fade extremes using ATR, RSI, and Fibonacci overshoot.
+        """
+        dfs = download_and_split(tickers, start=start, end=end, period=period)
+        for ticker, df in dfs.items():
+            if df.empty:
+                continue
+
+            df.index = pd.to_datetime(df.index)
+            df.sort_index(inplace=True)
+
+            chart = CandlestickChart(df, ticker=ticker, show_candles=True, show=True)
+            chart.add_overlay(ATROverlay(window=14, show=True))
+            chart.add_overlay(RSIOverlay(period=14, show=True))
+            chart.add_overlay(FibonacciOverlay(lookback=30, show=True))
+            chart.add_overlay(VWAPOverlay(show=True))
+            chart.add_overlay(ZigzagSR(show=True))
+
+            df = chart.only_df()
+
+            atr = df["ATR_14"].iloc[-1]
+            atr_avg = df["ATR_14"].rolling(20).mean().iloc[-1]
+            rsi = df["RSI_14"].iloc[-1]
+            fib = last_price_fib_info(df)["fib_percent"]
+            close = df["Close"].iloc[-1]
+
+            if (atr > atr_avg * 1.5) and ((rsi < 30 and fib >= 61) or (rsi > 70 and fib <= 38)):
+                print(f"{ticker}: ⚡ Mean reversion opportunity detected (RSI {rsi:.1f}, Fib {fib:.1f}%)")
+                chart.add_text(f"High Volatility Fade\nRSI {rsi:.1f} | Fib {fib:.1f}%")
+                chart.plot(save_path=f"{self.chart_dir}/{ticker}_highvol.png")
+            else:
+                print(f"{ticker}: 🟣 No volatility fade setup")
+
+
     def trend_fibo_conf_strategy(self, tickers, start=None, end=None, period=None):
         dfs = download_and_split(tickers, start=start, end=end, period=period)
 
