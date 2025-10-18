@@ -8,7 +8,7 @@ import numpy as np
 # Step 1: Load and Clean Data
 # ------------------------------
 
-df = pd.read_csv("C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/feature_development/news_trading_bot/prod/stock_news_20251009_0915.csv")
+df = pd.read_csv("C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/feature_development/news_trading_bot/prod/stock_news_20251016_0915.csv")
 df = df.dropna(subset=["title", "stock"])
 
 def clean_text(text):
@@ -65,7 +65,7 @@ category_keywords = {
 }
 
 category_weights = {
-    "quarterly_earnings":5.0
+    "quarterly_earnings":5.0,
     "earnings": 1.5,
     "ipo": 1.3,
     "regulation": 1.2,
