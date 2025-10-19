@@ -32,7 +32,6 @@ class EnhancedRegimeOverlay(BaseOverlay):
         for c in required:
             if c not in df.columns:
                 raise ValueError(f"Input df must contain column '{c}'")
-
         df = df.copy()
 
         # EMAs
@@ -156,9 +155,7 @@ class EnhancedRegimeOverlay(BaseOverlay):
             palette=self.palette,
             alpha=0.7,
             s=80,
-            ax=ax,
-        )
-
+            ax=ax,)
         # EMAs (using the renamed columns)
         ax.plot(df_proc.index, df_proc["50_EMA_for_RD"], label="50 EMA (RD)", linewidth=2, linestyle="--")
         ax.plot(df_proc.index, df_proc["200_EMA_for_RD"], label="200 EMA (RD)", linewidth=2, linestyle="--")

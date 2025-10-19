@@ -93,7 +93,7 @@ df['weighted_score'] = df['sentiment_score'] * df['weight']
 # ------------------------------
 
 df.to_csv("C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/feature_development/news_trading_bot/prod/sentiment_per_news.csv", index=False)
-print("✅ Saved per-news sentiment with category/weight: sentiment_per_news.csv")
+print("Saved per-news sentiment with category/weight: sentiment_per_news.csv")
 
 # ------------------------------
 # Step 5: Grouped Sentiment per Stock
@@ -122,4 +122,4 @@ grouped_df["avg_weight"] = grouped_df["avg_weight"].round(2)
 # ------------------------------
 
 grouped_df.to_csv("C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/feature_development/news_trading_bot/prod/sentiment_by_stock.csv", index=False)
-print("✅ Saved grouped sentiment: sentiment_by_stock.csv")
+print("Saved grouped sentiment: sentiment_by_stock.csv")

@@ -84,10 +84,10 @@ def fetch_news_generic(keyword, start_dt, end_dt):
 
 # def fetch_news_for_all_keywords(start_dt, end_dt):
 #     all_news = []
-#     print(f"\n📅 Fetching news from {start_dt} to {end_dt} IST\n")
+#     print(f"\nFetching news from {start_dt} to {end_dt} IST\n")
 
 #     for keyword in ALL_QUERIES:
-#         print(f"   🔍 Querying: \"{keyword}\"")
+#         print(f"   Querying: \"{keyword}\"")
 #         news = fetch_news_generic(keyword, start_dt, end_dt)
 #         all_news.extend(news)
 
@@ -95,10 +95,10 @@ def fetch_news_generic(keyword, start_dt, end_dt):
 
 def fetch_news_for_all_keywords(start_dt, end_dt):
     all_news = []
-    print(f"\n📅 Fetching news from {start_dt} to {end_dt} IST in parallel...\n")
+    print(f"\nFetching news from {start_dt} to {end_dt} IST in parallel...\n")
 
     def task(keyword):
-        print(f"   🔍 Querying: \"{keyword}\"")
+        print(f"   Querying: \"{keyword}\"")
         return fetch_news_generic(keyword, start_dt, end_dt)
 
     with ThreadPoolExecutor(max_workers=10) as executor:
@@ -124,7 +124,7 @@ def save_to_csv(news_items, filename):
         dict_writer.writeheader()
         dict_writer.writerows(news_items)
 
-    print(f"\n✅ Saved {len(news_items)} news items to {filename}")
+    print(f"\nSaved {len(news_items)} news items to {filename}")
 
 
 # -------------------------
