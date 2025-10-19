@@ -427,14 +427,98 @@ class fibPipeline:
 
 
 
-if __name__ == "__main__":
-    # Create a singleton instance for convenience
-    pipeline = ChartPipeline()
-    # Plot NIFTY and BANKNIFTY
-    pipeline.plot(["^NSEI"])
-    pipeline.plot(["^NSEBANK"])
+# if __name__ == "__main__":
+#     # Create a singleton instance for convenience
+#     pipeline = ChartPipeline()
+#     # Plot NIFTY and BANKNIFTY
+#     pipeline.plot(["^NSEI"])
+#     pipeline.plot(["^NSEBANK"])
 
-    # Filter tickers by Fib percent and save only if in 50-65%
-    tickers = ["RELIANCE.NS", "TCS.NS"]
-    fib_level_filter = [50, 65]
-    pipeline.fibpercent(tickers, fib_level_filter=fib_level_filter)
+#     # Filter tickers by Fib percent and save only if in 50-65%
+#     tickers = ["RELIANCE.NS", "TCS.NS"]
+#     fib_level_filter = [50, 65]
+#     pipeline.fibpercent(tickers, fib_level_filter=fib_level_filter)
+
+
+
+
+if __name__ == '__main__':
+    # Create a singleton instance for convenience
+    fib_pipeline = fibPipeline()
+    gen_pipeline = genericStrategyPipeline()
+    # Plot NIFTY and BANKNIFTY
+    # fib_pipeline.plot("^NSEI",start="2023-02-01",end="2024-05-02")#period='1y')#,start='2024-01-01',end='2025-01-01')
+    # pipeline.plot(["^NSEBANK"])
+
+    LARGE_CAP_TICKERS = [
+        "RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "INFY.NS", "ICICIBANK.NS", "HINDUNILVR.NS",
+        "SBIN.NS", "LT.NS", "AXISBANK.NS", "BAJFINANCE.NS", "KOTAKBANK.NS",
+        "ITC.NS", "BHARTIARTL.NS", "MARUTI.NS", "SUNPHARMA.NS", "WIPRO.NS", "HCLTECH.NS",
+        "M&M.NS", "NTPC.NS", "POWERGRID.NS", "TATAMOTORS.NS", "ULTRACEMCO.NS",
+        "ADANIPORTS.NS", "CIPLA.NS", "DRREDDY.NS", "NESTLEIND.NS", "BAJAJFINSV.NS",
+        "DIVISLAB.NS", "JSWSTEEL.NS", "TATASTEEL.NS", "COALINDIA.NS", "GRASIM.NS",
+        "HDFCLIFE.NS", "TECHM.NS", "UPL.NS", "BRITANNIA.NS", "EICHERMOT.NS", "HINDALCO.NS",
+        "ONGC.NS", "BPCL.NS", "APOLLOHOSP.NS", "HEROMOTOCO.NS", "SBILIFE.NS", "ADANIENT.NS",
+        "BAJAJ-AUTO.NS", "INDUSINDBK.NS", "ICICILOMBARD.NS", "TATACONSUM.NS",
+        "ASIANPAINT.NS", "SHREECEM.NS", "DABUR.NS", "PIDILITIND.NS", "GODREJCP.NS",
+        "HAVELLS.NS", "TORNTPHARM.NS", "COLPAL.NS", "BERGEPAINT.NS",
+        "DLF.NS", "ZEEL.NS", "CHOLAFIN.NS", "MPHASIS.NS", "MINDTREE.NS",
+        "GAIL.NS", "IOC.NS", "PETRONET.NS", "REC.NS", "PNBHOUSING.NS",
+        "BANKBARODA.NS", "FEDERALBNK.NS", "IDFCFIRSTB.NS", "GLAND.NS", "ALKEM.NS",
+        "MAXHEALTH.NS", "ICICIPRULI.NS", "ABB.NS", "SIEMENS.NS", "CUMMINSIND.NS",
+        "BHEL.NS", "ASHOKLEY.NS", "CONCOR.NS", "IRCTC.NS", "LICHSGFIN.NS",
+        "SRF.NS", "ADANIGREEN.NS", "ADANITRANS.NS", "ADANIGAS.NS"]
+
+    MID_CAP_TICKERS = [
+        "MANKIND.NS", "AUROPHARMA.NS", "BANKBARODA.NS", "CANBK.NS", "FEDERALBNK.NS", "LTFH.NS",
+        "GLAND.NS", "GMRINFRA.NS", "GUJGAZ.NS", "INDIGO.NS", "PAGEIND.NS", "MPHASIS.NS",
+        "DIXON.NS", "POLYCAB.NS", "VOLTAS.NS", "TVSMOTOR.NS", "BALKRISIND.NS", "CROMPTON.NS",
+        "BIOCON.NS", "MAXFINANCIAL.NS", "CHOLAFIN.NS", "ICICISEC.NS", "PERSISTENT.NS",
+        "MUTHOOTFIN.NS", "ASTRAL.NS", "JUBILANT.NS", "ABB.NS", "ALKEM.NS",
+        "PIIND.NS", "TATAELXSI.NS", "COROMANDEL.NS", "MANAPPURAM.NS", "ADITYABIRLA.NS",
+        "ALEMBIC.NS", "BATAINDIA.NS", "LTIM.NS", "GODREJPROP.NS", "DEEPAKNTR.NS",
+        "TORNTPHARM.NS", "SUPREMEIND.NS", "THERMAX.NS", "RBLBANK.NS", "SUNDARMFIN.NS",
+        "SHRIRAMFIN.NS", "LAURUSLABS.NS", "UBL.NS", "JSWENERGY.NS", "IDFCFIRSTB.NS",
+        "IEX.NS", "ZYDUSLIFE.NS", "KEI.NS", "BLUESTARCO.NS", "TRENT.NS", "ADANIWIL.NS",
+        "ADANIPOWER.NS", "GUJFLUORO.NS", "CASTROLIND.NS", "INDHOTEL.NS", "RADICO.NS",
+        "APLAPOLLO.NS", "RELAXO.NS", "FINEORG.NS", "HATSUN.NS", "PRESTIGE.NS", "OBEROIRLTY.NS",
+        "VARUNBEV.NS", "EMAMILTD.NS", "ZEEL.NS", "BHEL.NS", "IRCTC.NS", "CONCOR.NS",
+        "IGL.NS", "JSWSTEEL.NS", "CUMMINSIND.NS", "KAJARIACER.NS", "RITES.NS",
+        "SKFINDIA.NS", "HAL.NS", "CESC.NS", "ENDURANCE.NS", "GRINDWELL.NS", "GNFC.NS",
+        "NAVINFLUOR.NS", "LINDEINDIA.NS", "IEX.NS", "AIAENG.NS", "KANSAINER.NS", "BIRLASOFT.NS",
+        "COFORGE.NS", "SYNGENE.NS", "NARAYANA.NS", "FORTIS.NS", "INDRAPRA MEDICAL.NS",
+        "PVR.NS", "INOXLEISUR.NS", "SPANDANA.NS", "CUB.NS", "KVB.NS", "SOUTHBANK.NS"]
+    
+    SMALL_CAP_TICKERS = [
+    "LAURUSLABS.NS", "GOFORTHPHIL.NS", "DELHIVERY.NS", "ASTERDM.NS", "PIRAMALPHAR.NS",
+    "APTUS.NS", "CSCCL.NS", "CITYUNION.NS", "PNCINFRA.NS", "TATACHEM.NS", "HINDCOPPER.NS",
+    "NAVINFLUOR.NS", "BEML.NS", "GRSE.NS", "SCHNEIDER.NS", "GMDC.NS", "CRAG.NS",
+    "CRAFTSMAN.NS", "SCHAFFLER.NS", "MAZDOCK.NS", "COCHIN.NS", "GARDENREACH.NS",
+    "RVNL.NS", "IRCON.NS", "IRFC.NS", "HUDCO.NS", "ENGINERSIND.NS", "NBCC.NS", "RITES.NS",
+    "TANLA.NS", "ROUTE.NS", "SUBEX.NS", "INTELLECT.NS", "HFCL.NS", "TEJASNET.NS",
+    "STERLITE.NS", "DEEPAKFERT.NS", "BALRAMCHIN.NS", "DHAMPURSUG.NS", "EIDPARRY.NS",
+    "AVANTIFEED.NS", "VENKY.NS", "KRBL.NS", "SOMANYCERA.NS", "ORIENTCEM.NS",
+    "INDIACEM.NS", "HEIDELBERG.NS", "JINDALSAW.NS", "WELSPUNCORP.NS", "RATNAMANI.NS",
+    "FINOLEXCAB.NS", "POLYCAB.NS", "BOROSIL.NS", "SWSOLAR.NS", "INOXWIND.NS",
+    "INDIAGLYCO.NS", "GUJALKALI.NS", "DCW.NS", "THIRUMALAI.NS", "RUCHIRA.NS", "JKPAPER.NS",
+    "WESTCOAST.NS", "DISHMAN.NS", "SEQUENT.NS", "CAPLIPOINT.NS", "GRANULES.NS",
+    "NATCO.NS", "NEULAND.NS", "WELSPUNIND.NS", "RAYMOND.NS", "ARVIND.NS", "FLFL.NS",
+    "HIMADRI.NS", "ORIENTCARB.NS", "PNBGILTS.NS", "UJJIVANSFB.NS", "EQUITAS.NS",
+    "CSBBANK.NS", "DCBBANK.NS", "REPCOHOME.NS"]
+
+    tickers = LARGE_CAP_TICKERS + MID_CAP_TICKERS + SMALL_CAP_TICKERS
+    # fib_level_filter = [40, 60]
+    # pipeline.strategy_1(tickers, fib_level_filter=fib_level_filter,start="2024-10-01",end="2025-05-01")
+    # fib_level_filter = [50, 61]
+    # fib_pipeline.strategy_2(tickers,fib_level_filter=fib_level_filter,  start="2023-11-01",end="2024-05-02") #period='1y'
+    fib_pipeline.strategy_no_filter(tickers,  start="2023-11-01",end="2024-05-02") #period='1y'
+    # gen_pipeline.multi_confluence_strategy(tickers,start="2023-11-01",end="2024-05-02")
+    # gen_pipeline.strategy_bullish_trend(tickers, start="2024-01-01", end="2024-10-01")
+    # gen_pipeline.strategy_bearish_trend(tickers, start="2024-01-01", end="2024-10-01")
+    # gen_pipeline.strategy_neutral_breakout(tickers, start="2024-01-01", end="2024-10-01")
+    # gen_pipeline.strategy_high_volatility(tickers, start="2024-01-01", end="2024-10-01")
+    # gen_pipeline.strategy_volume_burst(tickers,start="2024-06-01",end="2024-09-02")
+
+
+
+    

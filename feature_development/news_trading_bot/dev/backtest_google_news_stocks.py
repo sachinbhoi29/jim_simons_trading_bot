@@ -74,11 +74,11 @@ def save_to_csv(news_items, filename):
         writer = csv.DictWriter(output_file, fieldnames=keys)
         writer.writeheader()
         writer.writerows(news_items)
-    print(f"✅ Saved {len(news_items)} news items to {filename}")
+    print(f"Saved {len(news_items)} news items to {filename}")
 
 # Main execution
 if __name__ == "__main__":
-    print("🕵️ Backtesting stock-specific news from Google News RSS...\n")
+    print("Backtesting stock-specific news from Google News RSS...\n")
 
     news = fetch_news_for_date(STOCK, BACKTEST_DATE)
 

@@ -124,7 +124,7 @@ def save_to_csv(news_items, filename):
         dict_writer.writeheader()
         dict_writer.writerows(news_items)
 
-    print(f"\n✅ Saved {len(news_items)} news items to {filename}")
+    print(f"\nSaved {len(news_items)} news items to {filename}")
 
 
 # -------------------------
