@@ -1,11 +1,11 @@
 from pipeline.fib_strategy import fibPipeline
 from pipeline.generic_strategy import genericStrategyPipeline
+from pipeline.aiml_pipeline import AIMLFeaturePipeline
 
 
 if __name__ == '__main__':
     # Create a singleton instance for convenience
-    fib_pipeline = fibPipeline()
-    gen_pipeline = genericStrategyPipeline()
+    aiml_pipeline = AIMLFeaturePipeline()
     # Plot NIFTY and BANKNIFTY
     # fib_pipeline.plot("^NSEI",start="2023-02-01",end="2024-05-02")#period='1y')#,start='2024-01-01',end='2025-01-01')
     # pipeline.plot(["^NSEBANK"])
@@ -66,15 +66,10 @@ if __name__ == '__main__':
     "HIMADRI.NS", "ORIENTCARB.NS", "PNBGILTS.NS", "UJJIVANSFB.NS", "EQUITAS.NS",
     "CSBBANK.NS", "DCBBANK.NS", "REPCOHOME.NS"]
 
-    tickers = LARGE_CAP_TICKERS + MID_CAP_TICKERS + SMALL_CAP_TICKERS
-    # fib_level_filter = [40, 60]
-    # pipeline.strategy_1(tickers, fib_level_filter=fib_level_filter,start="2024-10-01",end="2025-05-01")
-    # fib_level_filter = [50, 61]
-    # fib_pipeline.strategy_2(tickers,fib_level_filter=fib_level_filter,  start="2023-11-01",end="2024-05-02") #period='1y'
-    fib_pipeline.strategy_no_filter(tickers,  start="2023-11-01",end="2024-05-02") #period='1y'
-    # gen_pipeline.multi_confluence_strategy(tickers,start="2023-11-01",end="2024-05-02")
-    # gen_pipeline.strategy_bullish_trend(tickers, start="2024-01-01", end="2024-10-01")
-    # gen_pipeline.strategy_bearish_trend(tickers, start="2024-01-01", end="2024-10-01")
-    # gen_pipeline.strategy_neutral_breakout(tickers, start="2024-01-01", end="2024-10-01")
-    # gen_pipeline.strategy_high_volatility(tickers, start="2024-01-01", end="2024-10-01")
-    # gen_pipeline.strategy_volume_burst(tickers,start="2024-06-01",end="2024-09-02")
+    tickers =["RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "INFY.NS", "ICICIBANK.NS", "HINDUNILVR.NS"] #LARGE_CAP_TICKERS + MID_CAP_TICKERS + SMALL_CAP_TICKERS
+    aiml_pipeline.generate_stock_features(tickers, start="2018-02-01",end="2025-10-02",add_index=True,show=False)
+    # aiml_pipeline.generate_index_features(start="2022-02-01",end="2025-05-02")
+
+
+
+    

@@ -114,11 +114,11 @@ with pd.ExcelWriter(intermediate_file, engine="openpyxl") as writer:
     for sheet, df in intermediate_results.items():
         df.to_excel(writer, sheet_name=sheet, index=False)
 
-print(f"✅ Saved per-news sentiment (validation): {intermediate_file}")
+print(f"Saved per-news sentiment (validation): {intermediate_file}")
 
 # Save aggregated (daily mean)
 with pd.ExcelWriter(aggregated_file, engine="openpyxl") as writer:
     for sheet, df in aggregated_results.items():
         df.to_excel(writer, sheet_name=sheet, index=False)
 
-print(f"✅ Saved aggregated daily sentiment: {aggregated_file}")
+print(f"Saved aggregated daily sentiment: {aggregated_file}")
