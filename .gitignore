@@ -77,3 +77,10 @@ npm-debug.log
 # Python dependencies
 Pipfile.lock
 requirements.txt
+
+
+# Machine learning model files
+*.json       # XGBoost
+*.pkl        # LightGBM (or other pickled models)
+*.cbm        # CatBoost
+*.txt        # LightGBM booster save_model
