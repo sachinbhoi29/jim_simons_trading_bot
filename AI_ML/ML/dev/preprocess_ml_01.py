@@ -34,7 +34,7 @@ def preprocess_financial_data(df: pd.DataFrame) -> pd.DataFrame:
     # -------------------------------
     # Main price and volume features
     price_cols = ["Close", "Open", "High", "Low", "Adj Close", "Range_pct", "future_return"]
-    vol_cols = ["Volume", "Cum_Vol", "Cum_TPV", "VWAP"]
+    vol_cols = ["Volume", "Cum_Vol", "Cum_TPV", "VWAP","NIFTY_Volume","NIFTY_Cum_Vol","BANKNIFTY_Volume","BANKNIFTY_Cum_Vol"]
 
     # Technical indicators (main ticker)
     tech_cols = [
@@ -117,7 +117,7 @@ def preprocess_financial_data(df: pd.DataFrame) -> pd.DataFrame:
         #     counter += 1
 
     # ---------- 2) Volume columns (log scale)
-    volume_cols = ["Volume", "Cum_Vol", "Cum_TPV"]
+    volume_cols = ["Volume", "Cum_Vol", "Cum_TPV","NIFTY_Volume","NIFTY_Cum_Vol","BANKNIFTY_Volume","BANKNIFTY_Cum_Vol"]
     for col in volume_cols:
         if col in df.columns:
             df[col + "_log"] = np.log1p(df[col])
@@ -248,12 +248,14 @@ def preprocess_financial_data(df: pd.DataFrame) -> pd.DataFrame:
         "Fibo_Status_Last_Close", 
         # Normalized price indicators (main ticker)
         "EMA_20_rel", "EMA_50_rel", "BB_mid_20_rel", "BB_upper_20_rel", "BB_lower_20_rel",
-        "EMA_fast_rel", "EMA_slow_rel", "VWAP_rel",
+        # "EMA_fast_rel", "EMA_slow_rel", 
+        "VWAP_rel",
         # Normalized price indicators (market context)
         "NIFTY_EMA_20_rel", "NIFTY_EMA_50_rel",
         "BANKNIFTY_EMA_20_rel", "BANKNIFTY_EMA_50_rel",
         # Normalized volume features
         "Volume_log", "Cum_Vol_log", "Cum_TPV_log",
+        "NIFTY_Volume_log","NIFTY_Cum_Vol_log","BANKNIFTY_Volume_log","BANKNIFTY_Cum_Vol_log",
         # Volatility indicators
         "ATR_rel", 
         # Market relative strength
