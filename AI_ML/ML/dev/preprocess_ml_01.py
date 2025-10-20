@@ -53,8 +53,6 @@ def preprocess_financial_data(df: pd.DataFrame) -> pd.DataFrame:
         "BANKNIFTY_RSI_14", "BANKNIFTY_MACD", "BANKNIFTY_MACD_signal"
     ]
 
-
-
     keep_cols = (
         ["Date", "Ticker"] +
         price_cols + vol_cols + tech_cols +
@@ -63,30 +61,11 @@ def preprocess_financial_data(df: pd.DataFrame) -> pd.DataFrame:
 
     df = df[[c for c in keep_cols if c in df.columns]].copy()
 
-    # -------------------------------
-    # 3️⃣ Handle Missing Values
-    # -------------------------------
-    # Forward fill then back fill (time-series safe)
-    # Define columns that are safe to fill
-    fill_cols = [
-        "EMA_20", "EMA_50", "BB_mid_20", "BB_upper_20", "BB_lower_20",
-        "RSI_14", "ATR_14", "MACD", "MACD_signal",
-        "EMA_fast", "EMA_slow", "%K", "%D",
-        "NIFTY_EMA_20", "NIFTY_EMA_50", "NIFTY_RSI_14", "NIFTY_MACD", "NIFTY_MACD_signal",
-        "BANKNIFTY_EMA_20", "BANKNIFTY_EMA_50", "BANKNIFTY_RSI_14", "BANKNIFTY_MACD", "BANKNIFTY_MACD_signal"
-    ]
-
-    # Apply limited forward/backward fill only on those columns
-    df[fill_cols] = (
-        df[fill_cols]
-        .fillna(method="ffill", limit=2)
-        .fillna(method="bfill", limit=2)
-    )
 
     # -------------------------------
     # 4️⃣ Feature Normalization (Explicit)
     # -------------------------------
-
+    df['future_return'] = df['future_return'] / 100  
     # ---------- 1) Price-based indicators (% deviation from Close)
     price_rel_cols = [
         "EMA_20", "EMA_50", "BB_mid_20", "BB_upper_20", "BB_lower_20",
@@ -194,6 +173,33 @@ def preprocess_financial_data(df: pd.DataFrame) -> pd.DataFrame:
 
 
     # -------------------------------
+    # 3️⃣ Handle Missing Values
+    # -------------------------------
+    # Forward fill then back fill (time-series safe)
+
+    # Define columns that are safe to fill
+    fill_cols = [
+        "EMA_20", "EMA_50", "BB_mid_20", "BB_upper_20", "BB_lower_20",
+        "RSI_14", "ATR_14", "MACD", "MACD_signal",
+        "EMA_fast", "EMA_slow", "%K", "%D",
+        "NIFTY_EMA_20", "NIFTY_EMA_50", "NIFTY_RSI_14", "NIFTY_MACD", "NIFTY_MACD_signal",
+        "BANKNIFTY_EMA_20", "BANKNIFTY_EMA_50", "BANKNIFTY_RSI_14", "BANKNIFTY_MACD", "BANKNIFTY_MACD_signal",
+        "NIFTY_EMA_20_rel","NIFTY_EMA_50_rel","BANKNIFTY_EMA_20_rel","BANKNIFTY_EMA_50_rel",
+        "NIFTY_Volume_log","NIFTY_Cum_Vol_log","BANKNIFTY_Volume_log",
+        "NIFTY_rel","BANKNIFTY_rel","BANKNIFTY_Cum_Vol_log",
+        "NIFTY_RSI_14_z","NIFTY_MACD_z","NIFTY_MACD_signal_z","BANKNIFTY_RSI_14_z",
+        "BANKNIFTY_MACD_z","BANKNIFTY_MACD_signal_z"
+
+    ]
+    # Apply limited forward/backward fill only on those columns
+    df[fill_cols] = (
+        df[fill_cols]
+        .fillna(method="ffill", limit=1)
+        .fillna(method="bfill", limit=1)
+    )
+
+
+    # -------------------------------
     # 7️⃣b Trim initial NaN patch per Ticker
     # -------------------------------
     critical_cols = [
@@ -206,7 +212,10 @@ def preprocess_financial_data(df: pd.DataFrame) -> pd.DataFrame:
         # normalized/derived versions
         "BB_mid_20_rel", "BB_upper_20_rel", "BB_lower_20_rel",
         "ATR_rel", "NIFTY_rel", "BANKNIFTY_rel",
-        "RSI_14_z", "MACD_z", "MACD_signal_z", "%K_z", "%D_z",'BANKNIFTY_RSI_14_z']
+        "RSI_14_z", "MACD_z", "MACD_signal_z", "%K_z", "%D_z",'BANKNIFTY_RSI_14_z',
+        "NIFTY_EMA_20_rel","NIFTY_EMA_50_rel","BANKNIFTY_EMA_20_rel","BANKNIFTY_EMA_50_rel",
+        "NIFTY_Volume_log","NIFTY_Cum_Vol_log","BANKNIFTY_Volume_log",
+        "NIFTY_rel","BANKNIFTY_rel"]
 
     if "Ticker" in df.columns:
         trimmed = []
@@ -235,12 +244,6 @@ def preprocess_financial_data(df: pd.DataFrame) -> pd.DataFrame:
         df = pd.concat(trimmed_tail, ignore_index=True)
 
 
-    # Apply limited forward/backward fill only on those columns
-    df[fill_cols] = (
-        df[fill_cols]
-        .fillna(method="ffill", limit=2)
-        .fillna(method="bfill", limit=2)
-    )
     ml_cols = [
         # Target + basic features
         "Date", "Ticker", "future_return", "Range_pct",
