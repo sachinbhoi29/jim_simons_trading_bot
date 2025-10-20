@@ -66,8 +66,8 @@ if __name__ == '__main__':
     "HIMADRI.NS", "ORIENTCARB.NS", "PNBGILTS.NS", "UJJIVANSFB.NS", "EQUITAS.NS",
     "CSBBANK.NS", "DCBBANK.NS", "REPCOHOME.NS"]
 
-    tickers =["RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "INFY.NS", "ICICIBANK.NS", "HINDUNILVR.NS"] #LARGE_CAP_TICKERS + MID_CAP_TICKERS + SMALL_CAP_TICKERS
-    aiml_pipeline.generate_stock_features(tickers, start="2018-02-01",end="2025-10-02",add_index=True,show=False)
+    tickers = LARGE_CAP_TICKERS
+    aiml_pipeline.generate_stock_features(tickers, start="2017-02-01",end="2025-10-02",add_index=True,show=False)
     # aiml_pipeline.generate_index_features(start="2022-02-01",end="2025-05-02")
 
 
