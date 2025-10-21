@@ -1,0 +1,58 @@
+Best LightGBM params: {'colsample_bytree': 1.0, 'learning_rate': 0.05, 'max_depth': 6, 'n_estimators': 300, 'subsample': 0.8}
+
+GridSearch CatBoost...
+Best CatBoost precision: 0.6681445901841246
+
+XGBoost high-confidence threshold: 0.684
+XGBoost High-Confidence Precision: 0.8055
+Confusion Matrix (TP/FP focused):
+ [[15589   971]
+ [11942  4021]]
+Top 10 high-confidence positive trades:
+             Date         Ticker   TopProb
+136749 2025-04-09   SUNPHARMA.NS  0.950836
+55303  2020-05-22   EICHERMOT.NS  0.948618
+23961  2020-05-27  BANKBARODA.NS  0.948003
+23960  2020-05-26  BANKBARODA.NS  0.947330
+55302  2020-05-21   EICHERMOT.NS  0.945202
+23962  2020-05-28  BANKBARODA.NS  0.943864
+142626 2025-04-09   TATASTEEL.NS  0.937756
+20044  2020-05-28  BAJAJFINSV.NS  0.937066
+43549  2020-05-22      CONCOR.NS  0.935679
+43550  2020-05-26      CONCOR.NS  0.934388
+
+LightGBM high-confidence threshold: 0.684
+LightGBM High-Confidence Precision: 0.8077
+Confusion Matrix (TP/FP focused):
+ [[15719   841]
+ [12431  3532]]
+Top 10 high-confidence positive trades:
+             Date         Ticker   TopProb
+634    2020-05-26         ABB.NS  0.954038
+633    2020-05-22         ABB.NS  0.952443
+632    2020-05-21         ABB.NS  0.951495
+23959  2020-05-22  BANKBARODA.NS  0.944141
+142624 2025-04-07   TATASTEEL.NS  0.943327
+23960  2020-05-26  BANKBARODA.NS  0.942506
+20042  2020-05-26  BAJAJFINSV.NS  0.941073
+20041  2020-05-22  BAJAJFINSV.NS  0.939205
+23958  2020-05-21  BANKBARODA.NS  0.938837
+61611  2025-04-09       GLAND.NS  0.938046
+
+CatBoost high-confidence threshold: 0.702
+CatBoost High-Confidence Precision: 0.8079
+Confusion Matrix (TP/FP focused):
+ [[15779   781]
+ [12678  3285]]
+Top 10 high-confidence positive trades:
+             Date         Ticker   TopProb
+634    2020-05-26         ABB.NS  0.969697
+633    2020-05-22         ABB.NS  0.966522
+23962  2020-05-28  BANKBARODA.NS  0.966167
+636    2020-05-28         ABB.NS  0.963615
+142624 2025-04-07   TATASTEEL.NS  0.957983
+635    2020-05-27         ABB.NS  0.957420
+61609  2025-04-07       GLAND.NS  0.956288
+136747 2025-04-07   SUNPHARMA.NS  0.953722
+69445  2025-04-07     HCLTECH.NS  0.953319
+142625 2025-04-08   TATASTEEL.NS  0.952985

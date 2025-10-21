@@ -24,8 +24,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     Create advanced derived and relational financial indicators
     from the base technical and market features.
     """
-
-
     # -------------------------------
     #  A. Trend & Momentum Relationships
     # -------------------------------
@@ -34,7 +32,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     df["BANKNIFTY_EMA_diff"] = df["BANKNIFTY_EMA_20"] - df["BANKNIFTY_EMA_50"]
 
     # Relative differences normalized to Close
-    df["EMA_diff_rel"] = df["EMA_diff"] / df["Close"]
     df["MACD_diff"] = df["MACD"] - df["MACD_signal"]
 
     # Cross-instrument divergence
@@ -43,12 +40,12 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     df["MACD_diff_NIFTY"] = df["MACD"] - df["NIFTY_MACD"]
     df["MACD_diff_BANKNIFTY"] = df["MACD"] - df["BANKNIFTY_MACD"]
 
-    # -------------------------------
-    #  B. Volatility & Range Metrics
-    # -------------------------------
-    df["ATR_Range_ratio"] = df["ATR_14"] / (df["Range_pct"].abs() + 1e-6)
-    df["Volatility_ratio_Market"] = df["ATR_14"] / (df["NIFTY_ATR_14"] + 1e-6)
-    df["Volatility_ratio_Bank"] = df["ATR_14"] / (df["BANKNIFTY_ATR_14"] + 1e-6)
+    # # -------------------------------
+    # #  B. Volatility & Range Metrics
+    # # -------------------------------
+    # df["ATR_Range_ratio"] = df["ATR_14"] / (df["Range_pct"].abs() + 1e-6)
+    # df["Volatility_ratio_Market"] = df["ATR_14"] / (df["NIFTY_ATR_14"] + 1e-6)
+    # df["Volatility_ratio_Bank"] = df["ATR_14"] / (df["BANKNIFTY_ATR_14"] + 1e-6)
 
     # -------------------------------
     #  C. Market Relative Price Strength
@@ -57,8 +54,8 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     df["VWAP_NIFTY_diff"] = df["VWAP"] - df["NIFTY_EMA_20"]
     df["VWAP_BANKNIFTY_diff"] = df["VWAP"] - df["BANKNIFTY_EMA_20"]
 
-    df["Price_vs_NIFTY"] = (df["Close"] / df["NIFTY_Close"]) - 1
-    df["Price_vs_BANKNIFTY"] = (df["Close"] / df["BANKNIFTY_Close"]) - 1
+    # df["Price_vs_NIFTY"] = (df["Close"] / df["NIFTY_Close"]) - 1
+    # df["Price_vs_BANKNIFTY"] = (df["Close"] / df["BANKNIFTY_Close"]) - 1
 
     # -------------------------------
     #  D. Bollinger Band Dynamics
