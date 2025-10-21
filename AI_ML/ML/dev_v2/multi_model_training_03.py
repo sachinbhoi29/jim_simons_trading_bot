@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, roc_auc_score
+from sklearn.metrics import precision_score, confusion_matrix, roc_auc_score
 import xgboost as xgb
 import lightgbm as lgb
 from catboost import CatBoostClassifier
@@ -10,45 +10,41 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # ===============================
-# 1️⃣ Load ML-ready data
+# ⚙️ Adjustable Parameters
 # ===============================
-df = pd.read_csv("C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/data/normalized_data_for_ml.csv")
+DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/data/normalized_data_for_ml.csv"
+MODEL_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/models/"
+TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/data/"
+
+TARGET_THRESHOLD = 0.002       # top 0.2% future return
+MIN_TRADES = 1000             # minimum high-confidence trades to allow
+PRECISION_FLOOR = 0.80        # minimum acceptable precision for high-confidence trades
+
+# Model hyperparameters
+N_ESTIMATORS = 200
+MAX_DEPTH = 4
+LEARNING_RATE = 0.05
+SUBSAMPLE = 0.8
+COLSAMPLE = 0.8
+
+# ===============================
+# 1️⃣ Load data
+# ===============================
+df = pd.read_csv(DATA_PATH)
 df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
 df['Ticker'] = df['Ticker'].astype(str)
 
 # ===============================
-# 2️⃣ Define binary target (top 0.2% future return)
+# 2️⃣ Define target
 # ===============================
-threshold = 0.002
-df['target_bin'] = (df['future_return'] > threshold).astype(int)
+df['target_bin'] = (df['future_return'] > TARGET_THRESHOLD).astype(int)
 print("Target counts:\n", df['target_bin'].value_counts())
 
 # ===============================
 # 3️⃣ Prepare features
 # ===============================
-filtered_features = [
-    # EMA features
-    'EMA_diff_rel', 'EMA_20_rel', 'EMA_50_rel', 'EMA_fast_rel', 'EMA_slow_rel',
-    'Close_vs_EMA20', 'Close_vs_EMA50',
-    
-    # Bollinger
-    'BB_Width', 'BB_Pos', 'BB_Mid_Dev',
-    
-    # ATR / Range
-    'ATR_Range_ratio', 'Range_over_ATR', 'Range_over_Close',
-    
-    # Momentum
-    'MACD_diff', 'RSI_diff_NIFTY', 'RSI_diff_BANKNIFTY', 'RSI_vs_MACD',
-    
-    # VWAP / Volume
-    'VWAP_rel', 'VWAP_minus_Close', 'VWAP_minus_EMA20',
-    'Volume_log', 'Cum_Vol_log', 'Cum_TPV_log',
-    
-    # Regime
-    'NIFTY_Enhanced_Regime_for_RD', 'BANKNIFTY_Enhanced_Regime_for_RD'
-]
-
-features = filtered_features
+exclude = ['Date', 'Ticker', 'future_return', 'target_bin']
+features = [col for col in df.columns if col not in exclude]
 
 X = df[features]
 y = df['target_bin']
@@ -65,7 +61,7 @@ X_train, X_test = X[train_mask], X[test_mask]
 y_train, y_test = y[train_mask], y[test_mask]
 
 # ===============================
-# 5️⃣ Model definitions (imbalanced)
+# 5️⃣ Model definitions
 # ===============================
 pos_weight = y_train.value_counts()[0] / y_train.value_counts()[1]
 
@@ -75,26 +71,27 @@ models = {
         eval_metric='logloss',
         random_state=42,
         use_label_encoder=False,
-        n_estimators=200,
-        max_depth=4,
-        learning_rate=0.05,
-        subsample=0.8,
-        colsample_bytree=0.8,
+        n_estimators=N_ESTIMATORS,
+        max_depth=MAX_DEPTH,
+        learning_rate=LEARNING_RATE,
+        subsample=SUBSAMPLE,
+        colsample_bytree=COLSAMPLE,
         scale_pos_weight=pos_weight
     ),
     'LightGBM': lgb.LGBMClassifier(
-        n_estimators=200,
-        max_depth=4,
-        learning_rate=0.05,
-        subsample=0.8,
-        colsample_bytree=0.8,
+        n_estimators=N_ESTIMATORS,
+        max_depth=MAX_DEPTH,
+        learning_rate=LEARNING_RATE,
+        subsample=SUBSAMPLE,
+        colsample_bytree=COLSAMPLE,
         random_state=42,
-        class_weight='balanced'
+        class_weight='balanced',
+    verbose=-1,
     ),
     'CatBoost': CatBoostClassifier(
-        iterations=200,
-        depth=4,
-        learning_rate=0.05,
+        iterations=N_ESTIMATORS,
+        depth=MAX_DEPTH,
+        learning_rate=LEARNING_RATE,
         verbose=0,
         random_state=42,
         auto_class_weights='Balanced'
@@ -102,34 +99,58 @@ models = {
 }
 
 # ===============================
-# 6️⃣ Train, evaluate, and save
+# 6️⃣ Automatic threshold selection function
+# ===============================
+def select_threshold(y_true, y_prob, min_trades=MIN_TRADES, precision_floor=PRECISION_FLOOR):
+    thresholds = np.linspace(0.5, 0.95, 50)
+    for t in thresholds:
+        y_pred = (y_prob >= t).astype(int)
+        num_trades = y_pred.sum()
+        if num_trades >= min_trades:
+            prec = precision_score(y_true, y_pred)
+            if prec >= precision_floor:
+                return t
+    return 0.5  # fallback if no threshold satisfies
+
+# ===============================
+# 7️⃣ Train, evaluate, and save
 # ===============================
 for name, model in models.items():
     print(f"\nTraining {name}...")
     model.fit(X_train, y_train)
-    
+
     y_prob = model.predict_proba(X_test)[:, 1]
-    y_pred = (y_prob >= 0.5).astype(int)
-    
-    acc = accuracy_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred)
-    auc = roc_auc_score(y_test, y_prob)
-    cm = confusion_matrix(y_test, y_pred)
-    
-    print(f"{name} Accuracy: {acc:.4f}, F1: {f1:.4f}, AUC: {auc:.4f}")
-    print("Confusion Matrix:\n", cm)
-    
-    # High-confidence ranking
+
+    # Automatically select threshold
+    best_threshold = select_threshold(y_test, y_prob)
+    print(f"Using threshold {best_threshold:.3f} for high-confidence positives")
+
+    # Classify high-confidence positives
+    y_pred_highconf = (y_prob >= best_threshold).astype(int)
+
+    # Evaluate
+    precision = precision_score(y_test, y_pred_highconf)
+    cm = confusion_matrix(y_test, y_pred_highconf)
+    print(f"{name} High-Confidence Precision: {precision:.4f}")
+    print("Confusion Matrix (TP/FP focused):\n", cm)
+
+    # High-confidence trades
     X_test_df = X_test.copy()
     X_test_df['TopProb'] = y_prob
     X_test_df['Ticker'] = df.loc[test_mask, 'Ticker'].values
     X_test_df['Date'] = df.loc[test_mask, 'Date'].values
-    
-    ranking = X_test_df.sort_values(by='TopProb', ascending=False)
-    print("Top 10 high-confidence positives:")
-    print(ranking[['Date', 'Ticker', 'TopProb']].head(10))
-    
+    high_conf_trades = X_test_df[X_test_df['TopProb'] >= best_threshold]
+    high_conf_trades_sorted = high_conf_trades.sort_values(by='TopProb', ascending=False)
+
+    print("Top 10 high-confidence positive trades:")
+    print(high_conf_trades_sorted[['Date', 'Ticker', 'TopProb']].head(10))
+
     # Save model
-    model_path = f"C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/models/{name}_model_highconf.pkl"
+    model_path = f"{MODEL_SAVE_PATH}{name}_model_highconf.pkl"
     joblib.dump(model, model_path)
     print(f"{name} model saved at {model_path}")
+
+    # Save high-confidence trades
+    trades_path = f"{TRADES_SAVE_PATH}{name}_highconf_trades.csv"
+    high_conf_trades_sorted.to_csv(trades_path, index=False)
+    print(f"High-confidence trades saved at {trades_path}")
