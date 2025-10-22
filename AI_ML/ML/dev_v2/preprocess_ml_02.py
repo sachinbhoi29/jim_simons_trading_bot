@@ -162,9 +162,9 @@ def preprocess_derived_features(df: pd.DataFrame, smooth=True, scale=True) -> pd
         df_ml[numeric_cols] = scaler.fit_transform(df_ml[numeric_cols])
 
     # ====================================================
-    # ✅ Done
+    # Done
     # ====================================================
-    print("✅ Preprocessing complete.")
+    print("Preprocessing complete.")
     print(f"Final ML columns: {len(df_ml.columns)} | Shape: {df_ml.shape}")
     return df_ml
 
@@ -184,4 +184,4 @@ if __name__ == "__main__":
 
     print(f"Saving preprocessed ML-ready dataset to {output_path} ...")
     df_features.to_csv(output_path, index=False)
-    print("✅ Done.")
+    print("Done.")
