@@ -1,19 +1,20 @@
 import pandas as pd
 import numpy as np
 import joblib
-from sklearn.metrics import precision_score, recall_score, confusion_matrix
+from sklearn.metrics import precision_score
 
 # ===============================
-# ⚙️ CONFIGURATION
+# ⚙️ CONFIGURATION (ALL PARAMETERS HERE)
 # ===============================
 MODEL_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/models/"
 DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/data/normalized_data_for_ml.csv"
 TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/data/"
 
-TARGET_THRESHOLD = 0.002        # target for positive future return
-MIN_TRADES = 500                # minimum trades for consideration
-PRECISION_FLOOR = 0.75          # minimum acceptable precision
-TOP_LIMIT = 2000                # max number of trades to consider
+TARGET_THRESHOLD = 0.002      # Minimum future return to count as positive
+PRECISION_FLOOR = 0.30        # Minimum acceptable precision for threshold selection
+MIN_TRADES = 500              # Minimum trades at each threshold to consider
+TOP_LIMIT = None               # Max number of trades to select (None = no limit)
+THRESHOLD_SEARCH_STEPS = 50   # Number of candidate thresholds to scan between 0.5-0.99
 
 # ===============================
 # 1️⃣ LOAD DATA
@@ -30,16 +31,7 @@ features = [c for c in df.columns if c not in exclude]
 X = df[features]
 y = df["target_bin"]
 
-# Split by ticker (same as training)
-from sklearn.model_selection import train_test_split
-tickers = df["Ticker"].unique()
-_, test_tickers = train_test_split(tickers, test_size=0.2, random_state=42)
-test_mask = df["Ticker"].isin(test_tickers)
-
-X_test = X[test_mask].reset_index(drop=True)
-y_test = y[test_mask].reset_index(drop=True)
-
-print(f"Test samples: {len(X_test)} | Positive rate: {y_test.mean():.4f}")
+print(f"Total samples: {len(X)} | Positive rate: {y.mean():.4f}")
 
 # ===============================
 # 2️⃣ LOAD MODELS
@@ -50,74 +42,64 @@ best_lgb = joblib.load(MODEL_PATH + "LightGBM_model_highconf.pkl")
 best_cat = joblib.load(MODEL_PATH + "CatBoost_model_highconf.pkl")
 
 # ===============================
-# 3️⃣ ENSEMBLE PROBABILITIES
+# 3️⃣ GENERATE ENSEMBLE PROBABILITIES
 # ===============================
 print("\nGenerating ensemble probabilities...")
-xgb_prob = best_xgb.predict_proba(X_test)[:, 1]
-lgb_prob = best_lgb.predict_proba(X_test)[:, 1]
-cat_prob = best_cat.predict_proba(X_test)[:, 1]
+xgb_prob = best_xgb.predict_proba(X)[:, 1]
+lgb_prob = best_lgb.predict_proba(X)[:, 1]
+cat_prob = best_cat.predict_proba(X)[:, 1]
+df["prob"] = (xgb_prob + lgb_prob + cat_prob) / 3
 
-ensemble_prob = (xgb_prob + lgb_prob + cat_prob) / 3
-
-# Attach info for analysis
-test_df = pd.DataFrame({
-    "prob": ensemble_prob,
-    "true": y_test,
-    "Ticker": df.loc[test_mask, "Ticker"].values,
-    "Date": df.loc[test_mask, "Date"].values,
-    "future_return": df.loc[test_mask, "future_return"].values
-})
-
-test_df = test_df.sort_values(by="prob", ascending=False).reset_index(drop=True)
-print("\nTop probability stats:\n", test_df["prob"].describe(percentiles=[0.9, 0.95, 0.99]))
+print("\nTop probability stats:\n", df["prob"].describe(percentiles=[0.9, 0.95, 0.99]))
 
 # ===============================
-# 4️⃣ THRESHOLD SELECTION (High Precision)
+# 4️⃣ THRESHOLD SELECTION (HIGH-PRECISION)
 # ===============================
+print("\nOptimizing threshold for high-confidence trades...")
 precisions = []
-thresholds = np.linspace(0.99, 0.5, 50)
+thresholds = np.linspace(0.99, 0.5, THRESHOLD_SEARCH_STEPS)
 
 for t in thresholds:
-    preds = (test_df["prob"] >= t).astype(int)
+    preds = (df["prob"] >= t).astype(int)
     n_trades = preds.sum()
     if n_trades < MIN_TRADES:
         continue
-    prec = precision_score(test_df["true"], preds)
-    rec = recall_score(test_df["true"], preds)
+    prec = precision_score(df["target_bin"], preds)
+    rec = (preds & df["target_bin"]).sum() / df["target_bin"].sum()
     precisions.append((t, prec, rec, n_trades))
 
-if not precisions:
-    print("\n⚠️ No threshold meets minimum trade requirement. Using default 0.9")
-    best_threshold = 0.9
-else:
+if precisions:
     precisions_df = pd.DataFrame(precisions, columns=["threshold", "precision", "recall", "n_trades"])
-    # pick threshold with precision above floor and max number of trades
     valid = precisions_df[precisions_df["precision"] >= PRECISION_FLOOR]
     if not valid.empty:
         best_row = valid.sort_values(by="n_trades", ascending=False).iloc[0]
         best_threshold = best_row["threshold"]
     else:
         best_threshold = precisions_df.sort_values(by="precision", ascending=False).iloc[0]["threshold"]
+else:
+    print("\n⚠️ No threshold meets minimum trade requirement. Using default 0.9")
+    best_threshold = 0.9
 
 print("\n===== Threshold optimization =====")
-print(precisions_df.head(10))
+if precisions:
+    print(precisions_df.head(10))
 print(f"\nSelected threshold for high-confidence trades: {best_threshold:.3f}")
 
 # ===============================
 # 5️⃣ FINAL SELECTION
 # ===============================
-test_df["pred"] = (test_df["prob"] >= best_threshold).astype(int)
-selected = test_df[test_df["pred"] == 1]
+df["pred"] = (df["prob"] >= best_threshold).astype(int)
+selected = df[df["pred"] == 1]
 
-# Ensure we don't take too many trades
-if len(selected) > TOP_LIMIT:
+# Limit to top trades if TOP_LIMIT is set
+if TOP_LIMIT is not None:
     selected = selected.head(TOP_LIMIT)
 
-tp = ((selected["true"] == 1).sum())
-fp = ((selected["true"] == 0).sum())
+tp = ((selected["target_bin"] == 1).sum())
+fp = ((selected["target_bin"] == 0).sum())
 total = len(selected)
 precision_final = tp / (tp + fp) if (tp + fp) > 0 else 0
-recall_final = tp / test_df["true"].sum()
+recall_final = tp / df["target_bin"].sum() if df["target_bin"].sum() > 0 else 0
 
 print("\n================= HIGH-CONFIDENCE TRADE SUMMARY =================")
 print(f"Total trades selected: {total}")
