@@ -3,6 +3,8 @@ import numpy as np
 import joblib
 from sklearn.metrics import precision_score, confusion_matrix
 
+min_trades = 1000
+
 # ===============================
 # ⚙️ Paths
 # ===============================
@@ -55,8 +57,8 @@ ensemble_prob = (xgb_prob + lgb_prob + cat_prob) / 3
 # ===============================
 # 4️⃣ Automatic threshold selection
 # ===============================
-def select_threshold(y_true, y_prob, min_trades=1000, precision_floor=0.8):
-    thresholds = np.linspace(0.5, 0.95, 50)
+def select_threshold(y_true, y_prob, min_trades=min_trades, precision_floor=0.8):
+    thresholds = np.linspace(0.7, 0.99, 50)
     for t in thresholds:
         y_pred = (y_prob >= t).astype(int)
         num_trades = y_pred.sum()
