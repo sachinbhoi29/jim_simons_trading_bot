@@ -10,12 +10,12 @@ MODEL_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML
 DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/data/normalized_data_for_ml.csv"
 TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/data/"
 
-TARGET_THRESHOLD = 0.002      # Minimum future return to count as positive
-PRECISION_FLOOR = 0.30        # Minimum acceptable precision for threshold selection
+TARGET_THRESHOLD = 0.001      # Minimum future return to count as positive
+PRECISION_FLOOR = 0.50        # Minimum acceptable precision for threshold selection
 MIN_TRADES = 500              # Minimum trades at each threshold to consider
 TOP_LIMIT = None               # Max number of trades to select (None = no limit)
 THRESHOLD_SEARCH_STEPS = 50   # Number of candidate thresholds to scan between 0.5-0.99
-
+THRESHOLD = 0.65              # Threshold for high-confidence trades               
 # ===============================
 # 1️⃣ LOAD DATA
 # ===============================
@@ -57,7 +57,7 @@ print("\nTop probability stats:\n", df["prob"].describe(percentiles=[0.9, 0.95, 
 # ===============================
 print("\nOptimizing threshold for high-confidence trades...")
 precisions = []
-thresholds = np.linspace(0.99, 0.5, THRESHOLD_SEARCH_STEPS)
+thresholds = np.linspace(0.99, THRESHOLD, THRESHOLD_SEARCH_STEPS)
 
 for t in thresholds:
     preds = (df["prob"] >= t).astype(int)
@@ -77,7 +77,7 @@ if precisions:
     else:
         best_threshold = precisions_df.sort_values(by="precision", ascending=False).iloc[0]["threshold"]
 else:
-    print("\n⚠️ No threshold meets minimum trade requirement. Using default 0.9")
+    print("\nNo threshold meets minimum trade requirement. Using default 0.9")
     best_threshold = 0.9
 
 print("\n===== Threshold optimization =====")
@@ -102,6 +102,8 @@ precision_final = tp / (tp + fp) if (tp + fp) > 0 else 0
 recall_final = tp / df["target_bin"].sum() if df["target_bin"].sum() > 0 else 0
 
 print("\n================= HIGH-CONFIDENCE TRADE SUMMARY =================")
+percent_taken = total / len(df) * 100
+print(f"Percent of all opportunities taken: {percent_taken:.2f}%")
 print(f"Total trades selected: {total}")
 print(f"True Positives (real winners): {tp}")
 print(f"False Positives (fake signals): {fp}")
@@ -109,6 +111,7 @@ print(f"Precision (TP / TP+FP): {precision_final:.4f}")
 print(f"Recall: {recall_final:.4f}")
 if fp > 0:
     print(f"TP-to-FP ratio: {tp/fp:.2f}")
+
 print("==================================================================")
 
 # ===============================

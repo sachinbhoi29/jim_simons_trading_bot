@@ -3,7 +3,7 @@ import numpy as np
 import joblib
 from sklearn.metrics import precision_score, confusion_matrix
 
-min_trades = 1000
+min_trades = 5000
 
 # ===============================
 # ⚙️ Paths
@@ -11,7 +11,7 @@ min_trades = 1000
 MODEL_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/models/"
 DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/data/normalized_data_for_ml.csv"
 TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/data/"
-TARGET_THRESHOLD = 0.002
+TARGET_THRESHOLD = 0.001
 # ===============================
 # 1️⃣ Load test data
 # ===============================
