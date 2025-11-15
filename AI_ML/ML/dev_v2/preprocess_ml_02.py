@@ -6,10 +6,10 @@ from sklearn.preprocessing import StandardScaler
 def preprocess_derived_features(df: pd.DataFrame, smooth=True, scale=True) -> pd.DataFrame:
     """
     Refined preprocessing for derived feature dataset:
-    ✅ Per-ticker normalization
-    ✅ Proper z-score computation
-    ✅ Consistent scaling across features
-    ✅ Optional smoothing of noisy ratios
+    Per-ticker normalization
+    Proper z-score computation
+    Consistent scaling across features
+    Optional smoothing of noisy ratios
     """
 
     # ====================================================
