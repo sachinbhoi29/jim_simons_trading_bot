@@ -15,7 +15,7 @@ PRECISION_FLOOR = 0.50        # Minimum acceptable precision for threshold selec
 MIN_TRADES = 500              # Minimum trades at each threshold to consider
 TOP_LIMIT = None               # Max number of trades to select (None = no limit)
 THRESHOLD_SEARCH_STEPS = 50   # Number of candidate thresholds to scan between 0.5-0.99
-THRESHOLD = 0.65              # Threshold for high-confidence trades               
+THRESHOLD = 0.7              # Threshold for high-confidence trades               
 # ===============================
 # 1️⃣ LOAD DATA
 # ===============================
@@ -37,9 +37,9 @@ print(f"Total samples: {len(X)} | Positive rate: {y.mean():.4f}")
 # 2️⃣ LOAD MODELS
 # ===============================
 print("\nLoading trained models...")
-best_xgb = joblib.load(MODEL_PATH + "XGBoost_model_highconf.pkl")
-best_lgb = joblib.load(MODEL_PATH + "LightGBM_model_highconf.pkl")
-best_cat = joblib.load(MODEL_PATH + "CatBoost_model_highconf.pkl")
+best_xgb = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized.pkl")
+best_lgb = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized.pkl")
+best_cat = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized.pkl")
 
 # ===============================
 # 3️⃣ GENERATE ENSEMBLE PROBABILITIES

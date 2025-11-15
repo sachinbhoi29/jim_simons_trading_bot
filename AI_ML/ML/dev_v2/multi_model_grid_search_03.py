@@ -193,7 +193,7 @@ def evaluate_model(name, model, X_test, y_test):
     print(high_conf_trades_sorted[['Date','Ticker','TopProb']].head(10))
     
     # Save model
-    joblib.dump(model, f"{MODEL_SAVE_PATH}{name}_model_highconf.pkl")
+    joblib.dump(model, f"{MODEL_SAVE_PATH}{name}_model_highconf_gridsearch_optimized.pkl")
     high_conf_trades_sorted.to_csv(f"{TRADES_SAVE_PATH}{name}_highconf_trades.csv", index=False)
 
 # Evaluate & save

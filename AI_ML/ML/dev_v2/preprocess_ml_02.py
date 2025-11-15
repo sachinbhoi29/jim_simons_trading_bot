@@ -157,9 +157,20 @@ def preprocess_derived_features(df: pd.DataFrame, smooth=True, scale=True) -> pd
     # ====================================================
     # 9️⃣ Final Global Standardization (critical)
     # ====================================================
+    # Columns that should NEVER be scaled
+    do_not_scale = [
+        "future_return", 
+        "NIFTY_Enhanced_Regime_for_RD",
+        "BANKNIFTY_Enhanced_Regime_for_RD"
+    ]
+
+    # Only scale numeric columns except excluded ones
+    scale_cols = [c for c in df_ml.select_dtypes(include=[np.number]).columns 
+                if c not in do_not_scale]
+
     if scale:
         scaler = StandardScaler()
-        df_ml[numeric_cols] = scaler.fit_transform(df_ml[numeric_cols])
+        df_ml[scale_cols] = scaler.fit_transform(df_ml[scale_cols])
 
     # ====================================================
     # Done
