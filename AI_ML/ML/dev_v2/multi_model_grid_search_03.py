@@ -38,6 +38,10 @@ df['Ticker'] = df['Ticker'].astype(str)
 # 2️⃣ Define target
 # ===============================
 df['target_bin'] = (df['future_return'] > TARGET_THRESHOLD).astype(int)
+
+#for short
+df['target_bin'] = (df['future_return'] < -TARGET_THRESHOLD).astype(int)
+
 print("Target counts:\n", df['target_bin'].value_counts())
 
 # ===============================
@@ -61,6 +65,7 @@ X_train, X_test = X[train_mask], X[test_mask]
 y_train, y_test = y[train_mask], y[test_mask]
 
 pos_weight = y_train.value_counts()[0] / y_train.value_counts()[1]
+
 
 # ===============================
 # 5️⃣ Automatic threshold selection
