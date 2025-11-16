@@ -1,5 +1,10 @@
 Seen data vs unseen data
 
+What I understood was that, the  threshold is the precentage of confidance we give, so do not compare it with
+recall, recall can vary as very low row can satisy the 70% criteria and you will think recall is low.
+So always keep the threshold high, only then you will get quality trade, refardless of the how many trades we got
+
+
 Threshold = 0.8
 ================= HIGH-CONFIDENCE TRADE SUMMARY =================
 Percent of all opportunities taken: 2.82%
@@ -77,3 +82,6 @@ Precision (TP / TP+FP): 0.7036
 Recall: 0.3808
 TP-to-FP ratio: 2.37
 ==================================================================
+
+
+
