@@ -47,16 +47,17 @@ def preprocess_derived_features(df: pd.DataFrame, smooth=True, scale=True) -> pd
     # ====================================================
     # 3️⃣ Per-Ticker Rolling Z-score Normalization
     # ====================================================
-    zscore_cols = [
-        "RSI_14", "MACD", "MACD_signal", "%K", "%D",
-        "NIFTY_RSI_14", "NIFTY_MACD", "NIFTY_MACD_signal",
-        "BANKNIFTY_RSI_14", "BANKNIFTY_MACD", "BANKNIFTY_MACD_signal"
-    ]
-    for col in zscore_cols:
-        if col in df.columns:
-            df[col + "_z"] = df.groupby("Ticker")[col].transform(
-                lambda x: (x - x.rolling(20, min_periods=5).mean()) / x.rolling(20, min_periods=5).std()
-            )
+    # need to comment this as we do not have future values while predicting
+    # zscore_cols = [
+    #     "RSI_14", "MACD", "MACD_signal", "%K", "%D",
+    #     "NIFTY_RSI_14", "NIFTY_MACD", "NIFTY_MACD_signal",
+    #     "BANKNIFTY_RSI_14", "BANKNIFTY_MACD", "BANKNIFTY_MACD_signal"
+    # ]
+    # for col in zscore_cols:
+    #     if col in df.columns:
+    #         df[col + "_z"] = df.groupby("Ticker")[col].transform(
+    #             lambda x: (x - x.rolling(20, min_periods=5).mean()) / x.rolling(20, min_periods=5).std()
+    #         )
 
     # ====================================================
     # 4️⃣ Encode Regime Columns
@@ -125,15 +126,17 @@ def preprocess_derived_features(df: pd.DataFrame, smooth=True, scale=True) -> pd
         "Range_over_ATR", "Range_over_Close", "VWAP_minus_Close",
         "VWAP_minus_EMA20", "ATR_vs_NIFTY", "ATR_vs_BANKNIFTY",
         "log_ATR_vs_NIFTY",
-        # Lag features
-        "Range_pct_lag1", "Range_pct_lag2", "Range_pct_lag3",
-        "RSI_14_lag1", "RSI_14_lag2", "RSI_14_lag3",
-        "MACD_lag1", "MACD_lag2", "MACD_lag3",
-        "ATR_14_lag1", "ATR_14_lag2", "ATR_14_lag3",
+        # # Lag features
+        # "Range_pct_lag1", "Range_pct_lag2", "Range_pct_lag3",
+        # "RSI_14_lag1", "RSI_14_lag2", "RSI_14_lag3",
+        # "MACD_lag1", "MACD_lag2", "MACD_lag3",
+        # "ATR_14_lag1", "ATR_14_lag2", "ATR_14_lag3",
+        # lag requires previous data, which we do not have at cuurent
+        "Range_pct", "RSI_14", "MACD", "ATR_14"
         # Z-scores
-        "RSI_14_z", "MACD_z", "MACD_signal_z", "%K_z", "%D_z",
-        "NIFTY_RSI_14_z", "NIFTY_MACD_z", "NIFTY_MACD_signal_z",
-        "BANKNIFTY_RSI_14_z", "BANKNIFTY_MACD_z", "BANKNIFTY_MACD_signal_z",
+        # "RSI_14_z", "MACD_z", "MACD_signal_z", "%K_z", "%D_z",
+        # "NIFTY_RSI_14_z", "NIFTY_MACD_z", "NIFTY_MACD_signal_z",
+        # "BANKNIFTY_RSI_14_z", "BANKNIFTY_MACD_z", "BANKNIFTY_MACD_signal_z",
         # Volumes
         "Volume_log", "Cum_Vol_log", "Cum_TPV_log",
         "NIFTY_Volume_log", "NIFTY_Cum_Vol_log",
