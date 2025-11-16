@@ -107,6 +107,8 @@ def preprocess_derived_features(df: pd.DataFrame, smooth=True, scale=True) -> pd
         trimmed_tail.append(group)
     df = pd.concat(trimmed_tail, ignore_index=True)
 
+    df = df[df["future_return"].notna()]
+
     # ====================================================
     # 7️⃣ Select ML Columns (Core + Derived)
     # ====================================================
