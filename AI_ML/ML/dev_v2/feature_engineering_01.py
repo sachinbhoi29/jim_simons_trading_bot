@@ -69,10 +69,11 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     # -------------------------------
     #  E. Momentum Persistence (Lagged Features)
     # -------------------------------
-    lag_cols = ["Range_pct", "RSI_14", "MACD", "ATR_14"]
-    for col in lag_cols:
-        for lag in [1, 2, 3]:
-            df[f"{col}_lag{lag}"] = df.groupby("Ticker")[col].shift(lag)
+    # commented it as it creates the problem in live prediction
+    # lag_cols = ["Range_pct", "RSI_14", "MACD", "ATR_14"]
+    # for col in lag_cols:
+    #     for lag in [1, 2, 3]:
+    #         df[f"{col}_lag{lag}"] = df.groupby("Ticker")[col].shift(lag)
 
     df['Close_vs_EMA20'] = (df['Close'] / df['EMA_20']) - 1
     df['Close_vs_EMA50'] = (df['Close'] / df['EMA_50']) - 1
