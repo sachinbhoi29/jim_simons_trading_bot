@@ -6,16 +6,16 @@ from sklearn.metrics import precision_score
 # ===============================
 # ⚙️ CONFIGURATION (ALL PARAMETERS HERE)
 # ===============================
-MODEL_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/models/"
-DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/data/normalized_data_for_ml.csv"
-TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v2/data/"
+MODEL_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/models/"
+DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/normalized_data_for_ml.csv"
+TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/"
 
 TARGET_THRESHOLD = 0.001      # Minimum future return to count as positive
 PRECISION_FLOOR = 0.50        # Minimum acceptable precision for threshold selection
 MIN_TRADES = 500              # Minimum trades at each threshold to consider
 TOP_LIMIT = None               # Max number of trades to select (None = no limit)
 THRESHOLD_SEARCH_STEPS = 50   # Number of candidate thresholds to scan between 0.5-0.99
-THRESHOLD = 0.50              # Threshold for high-confidence trades               
+THRESHOLD = 0.57              # Threshold for high-confidence trades               
 # ===============================
 # 1️⃣ LOAD DATA
 # ===============================

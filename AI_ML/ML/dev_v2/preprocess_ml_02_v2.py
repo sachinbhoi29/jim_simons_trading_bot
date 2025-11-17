@@ -103,7 +103,7 @@ def preprocess_derived_features_v2(df: pd.DataFrame, smooth=True) -> pd.DataFram
     "NIFTY_EMA_20_rel", "NIFTY_EMA_50_rel",
     "BANKNIFTY_EMA_20_rel", "BANKNIFTY_EMA_50_rel",
     "MACD_diff", "RSI_diff_NIFTY", "RSI_diff_BANKNIFTY",
-    "VWAP_diff", "VWAP_NIFTY_diff", "VWAP_BANKNIFTY_diff",
+    "VWAP_diff", "VWAP_NIFTY_diff", "VWAP_BANKNIFTY_diff", #they differ, comment them
     "BB_Width", "BB_Pos", "NIFTY_BB_Width", "BANKNIFTY_BB_Width",
     "Close_vs_EMA20", "Close_vs_EMA50", "BB_Mid_Dev",
     "RSI_vs_MACD", "RSI_vs_NIFTY", "RSI_vs_BANKNIFTY",
