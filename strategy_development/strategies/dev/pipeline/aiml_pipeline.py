@@ -44,91 +44,95 @@ class AIMLFeaturePipeline:
         dfs = download_and_split(tickers, start=start, end=end, period=period)
 
         for ticker, df in dfs.items():
-            if df.empty or df.isna().all().all():
-                print(f"{ticker} returned empty or invalid data — skipped")
-                continue
+            try:
+                if df.empty or df.isna().all().all():
+                    print(f"{ticker} returned empty or invalid data — skipped")
+                    continue
 
-            df.columns.name = None
-            df.index = pd.to_datetime(df.index)
-            df.sort_index(inplace=True)
-            df['Ticker'] = ticker
-            df['future_return'] = df['Close'].shift(-self.future_return) / df['Close'] - 1
-            df['Range_pct'] = (df['High'] - df['Low']) / df['Close']
+                df.columns.name = None
+                df.index = pd.to_datetime(df.index)
+                df.sort_index(inplace=True)
+                df['Ticker'] = ticker
+                df['future_return'] = df['Close'].shift(-self.future_return) / df['Close'] - 1
+                df['Range_pct'] = (df['High'] - df['Low']) / df['Close']
 
-            chart = CandlestickChart(df, ticker=ticker, show_candles=True, show=show) # if you want to view plot
+                chart = CandlestickChart(df, ticker=ticker, show_candles=True, show=show) # if you want to view plot
 
-            # Trend & Regime
-            chart.add_overlay(EMAOverlay(window=20, color="green", show=True))
-            chart.add_overlay(EMAOverlay(window=50, color="red", show=True))
-            chart.add_overlay(BollingerBandsOverlay(show=True))
-            # chart.add_overlay(EnhancedRegimeOverlay(show=True))
-            chart.add_overlay(FibonacciOverlay(lookback=50, show=True))
+                # Trend & Regime
+                chart.add_overlay(EMAOverlay(window=20, color="green", show=True))
+                chart.add_overlay(EMAOverlay(window=50, color="red", show=True))
+                chart.add_overlay(BollingerBandsOverlay(show=True))
+                # chart.add_overlay(EnhancedRegimeOverlay(show=True))
+                chart.add_overlay(FibonacciOverlay(lookback=50, show=True))
 
-            # Support/Resistance
-            chart.add_overlay(ZigzagSR(
-                min_peak_distance=8, min_peak_prominence=10,
-                zone_merge_tolerance=0.007, max_zones=8,
-                color_zone="blue", alpha_zone=0.15,
-                show=True, show_fibo=False, show_trendline=True,
-                show_only_latest_fibo=False
-            ))
+                # Support/Resistance
+                chart.add_overlay(ZigzagSR(
+                    min_peak_distance=8, min_peak_prominence=10,
+                    zone_merge_tolerance=0.007, max_zones=8,
+                    color_zone="blue", alpha_zone=0.15,
+                    show=True, show_fibo=False, show_trendline=True,
+                    show_only_latest_fibo=False
+                ))
 
-            # Volume & Volatility
-            chart.add_subplot(VolumeOverlay(), height_ratio=1)
-            chart.add_subplot(VWAPOverlay(show=True), height_ratio=1)
-            chart.add_subplot(ATROverlay(), height_ratio=1)
+                # Volume & Volatility
+                chart.add_subplot(VolumeOverlay(), height_ratio=1)
+                chart.add_subplot(VWAPOverlay(show=True), height_ratio=1)
+                chart.add_subplot(ATROverlay(), height_ratio=1)
 
-            # Momentum
-            chart.add_subplot(RSIOverlay(period=14), height_ratio=1)
-            chart.add_subplot(MACDOverlay(show=True), height_ratio=1)
-            chart.add_subplot(StochasticOscillatorOverlay(show=True), height_ratio=1)
+                # Momentum
+                chart.add_subplot(RSIOverlay(period=14), height_ratio=1)
+                chart.add_subplot(MACDOverlay(show=True), height_ratio=1)
+                chart.add_subplot(StochasticOscillatorOverlay(show=True), height_ratio=1)
 
-            # --- Compute all overlays/subplots ---
-            df = chart.only_df()
-            # Merge index with stock
-            if add_index and df_index is not None and not df_index.empty:
-                # Ensure Date columns are datetime
-                df_index['Date_x'] = pd.to_datetime(df_index['Date_x'])
-                df = df.reset_index().rename(columns={'index': 'Date'})  # stock Date
-                df = pd.merge(df, df_index, left_on='Date', right_on='Date_x', how='left')
+                # --- Compute all overlays/subplots ---
+                df = chart.only_df()
+                # Merge index with stock
+                if add_index and df_index is not None and not df_index.empty:
+                    # Ensure Date columns are datetime
+                    df_index['Date_x'] = pd.to_datetime(df_index['Date_x'])
+                    df = df.reset_index().rename(columns={'index': 'Date'})  # stock Date
+                    df = pd.merge(df, df_index, left_on='Date', right_on='Date_x', how='left')
 
-            df.set_index('Date', inplace=True)
-            final_dfs.append(df)
+                df.set_index('Date', inplace=True)
+                final_dfs.append(df)
 
-            if show:
-                print('Show the stock on chart')
-                # --- Calculate indicator summaries ---
-                fib_info = last_price_fib_info(df)
-                fib_percent = round(fib_info.get("fib_percent", 0), 2)
-                fibo_status = df.get("Fibo_Status_Last_Close", pd.Series(["N/A"])).iloc[-1]
-                ema20 = df["EMA_20"].iloc[-1]
-                ema50 = df["EMA_50"].iloc[-1]
-                ema_trend = "Bullish" if ema20 > ema50 else "Bearish"
+                if show:
+                    print('Show the stock on chart')
+                    # --- Calculate indicator summaries ---
+                    fib_info = last_price_fib_info(df)
+                    fib_percent = round(fib_info.get("fib_percent", 0), 2)
+                    fibo_status = df.get("Fibo_Status_Last_Close", pd.Series(["N/A"])).iloc[-1]
+                    ema20 = df["EMA_20"].iloc[-1]
+                    ema50 = df["EMA_50"].iloc[-1]
+                    ema_trend = "Bullish" if ema20 > ema50 else "Bearish"
 
-                rsi = df["RSI_14"].iloc[-1]
-                rsi_signal = "Oversold" if rsi < 40 else "Overbought" if rsi > 60 else "Neutral"
+                    rsi = df["RSI_14"].iloc[-1]
+                    rsi_signal = "Oversold" if rsi < 40 else "Overbought" if rsi > 60 else "Neutral"
 
-                vwap = df["VWAP"].iloc[-1]
-                close = df["Close"].iloc[-1]
-                vol = df["Volume"].iloc[-1]
-                avg_vol = df["Volume"].rolling(20).mean().iloc[-1]
-                vol_signal = "High" if vol > avg_vol else "Low/Normal"
+                    vwap = df["VWAP"].iloc[-1]
+                    close = df["Close"].iloc[-1]
+                    vol = df["Volume"].iloc[-1]
+                    avg_vol = df["Volume"].rolling(20).mean().iloc[-1]
+                    vol_signal = "High" if vol > avg_vol else "Low/Normal"
 
-                # --- Annotation text for quick summary ---
-                note_text = (
-                    f"Fib%: {fib_percent}% ({fibo_status})\n"
-                    f"EMA Trend: {ema_trend}\n"
-                    f"RSI: {rsi:.1f} ({rsi_signal})\n"
-                    f"VWAP: {'Above' if close > vwap else 'Below'}\n"
-                    f"Volume: {vol_signal}"
-                )
+                    # --- Annotation text for quick summary ---
+                    note_text = (
+                        f"Fib%: {fib_percent}% ({fibo_status})\n"
+                        f"EMA Trend: {ema_trend}\n"
+                        f"RSI: {rsi:.1f} ({rsi_signal})\n"
+                        f"VWAP: {'Above' if close > vwap else 'Below'}\n"
+                        f"Volume: {vol_signal}"
+                    )
 
-                chart.add_text(note_text, x=1, y=0.98, fontsize=11, color="black", bbox=True)
-                # df.to_csv(f"{self.data_dir}/{ticker}_full_suite.csv")
-                # --- Save final chart ---
-                save_path = f"{self.chart_dir}/{ticker}_full_suite.png"
-                chart.plot(save_path=save_path)
-                print(f"Saved full-suite chart for {ticker} — Fib%: {fib_percent}% at {save_path}")
+                    chart.add_text(note_text, x=1, y=0.98, fontsize=11, color="black", bbox=True)
+                    # df.to_csv(f"{self.data_dir}/{ticker}_full_suite.csv")
+                    # --- Save final chart ---
+                    save_path = f"{self.chart_dir}/{ticker}_full_suite.png"
+                    chart.plot(save_path=save_path)
+                    print(f"Saved full-suite chart for {ticker} — Fib%: {fib_percent}% at {save_path}")
+
+            except Exception as e:
+                print(f"Error processing {ticker}: {e}")
                 
         if final_dfs:
             df_all = pd.concat(final_dfs, axis=0)  # stack rows

@@ -1,44 +1,87 @@
-# Byte-compiled / cached files
+# ============================================
+# PYTHON CACHE / TEMP FILES
+# ============================================
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyo
+*.pyd
+*.pkl
+*.pickle
+*.joblib
 
-# Virtual environment
+# ============================================
+# VIRTUAL ENVIRONMENTS
+# ============================================
 venv/
 env/
 .venv/
+ENV/
+*.conda/
+*.env
 
-# Jupyter Notebook checkpoints
+# ============================================
+# JUPYTER NOTEBOOK / PYCHARM / VS CODE
+# ============================================
 .ipynb_checkpoints/
+.idea/
+.vscode/
+*.swp
+*.swo
+*.bak
+*.tmp
+*.temp
 
-# Log files
+# ============================================
+# LOGS
+# ============================================
 *.log
 *.out
 *.err
+logs/
+*/logs/
 
-# Data files
+# ============================================
+# RAW / PROCESSED DATA FILES
+# ============================================
 *.csv
 *.tsv
 *.json
 *.xml
+*.yaml
+*.yml
+*.parquet
+*.feather
+*.hdf5
+*.npz
+*.npy
 
-# Excel files
+# ============================================
+# EXCEL FILES
+# ============================================
 *.xls
 *.xlsx
 *.xlsm
 *.xlsb
 
-# PDF and other documents
+# ============================================
+# DOCUMENTS AND REPORTS
+# ============================================
 *.pdf
+*.doc
+*.docx
 *.ppt
 *.pptx
 
-# Images and media files
+# ============================================
+# IMAGES & MEDIA FILES
+# ============================================
 *.png
 *.jpg
 *.jpeg
 *.gif
 *.bmp
+*.tiff
 *.svg
 *.mp4
 *.avi
@@ -46,41 +89,139 @@ env/
 *.mp3
 *.wav
 
-# Archives and compressed files
+# ============================================
+# ARCHIVES / COMPRESSED FILES
+# ============================================
 *.zip
 *.tar
 *.gz
+*.bz2
+*.xz
 *.rar
 *.7z
 
-# Database and SQLite files
+# ============================================
+# DATABASE FILES
+# ============================================
 *.db
 *.sqlite
 *.sqlite3
 
-# System-specific files
+# ============================================
+# OS / SYSTEM FILES
+# ============================================
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Editor backups and IDE files
-*.swp
-*.swo
-*.bak
-*.tmp
-*.idea/
-*.vscode/
-
-# Node.js dependencies (if applicable)
+# ============================================
+# NODE (IF PRESENT)
+# ============================================
 node_modules/
 npm-debug.log
 
-# Python dependencies
+# ============================================
+# PYTHON DEPENDENCY FILES
+# ============================================
 Pipfile.lock
-requirements.txt
+poetry.lock
+
+# keep requirements.txt (commonly needed)
+!requirements.txt
+
+# ============================================
+# MACHINE LEARNING MODELS
+# ============================================
+*.json
+*.txt
+*.model
+*.bin
+*.h5
+*.hdf5
+*.tflite
+*.pt            # PyTorch
+*.pth           # PyTorch
+*.onnx
+*.pkl           # sklearn/XGBoost/LightGBM
+*.cbm           # CatBoost
+
+# ============================================
+# TENSORBOARD / ML RUN DATA
+# ============================================
+logs/
+tensorboard/
+tb_logs/
+runs/
+
+# ============================================
+# AUTOGluon (VERY IMPORTANT)
+# ============================================
+# AutoGluon creates heavy model folders
+models/
+*/models/
+**/models/
+
+# AutoGluon model artifacts
+*.ag/
+*.ag_model/
+artifacts/
+*/artifacts/
+cache/
+*/cache/
+training/
+*/training/
+
+# Stacking / bagging model directories
+*_BAG_*/
+*/_BAG_*/
+*/models/*_BAG_*/
+*/models/*_fold*/
+*/models/*_stack*/
+*/models/*_opt*/
+*/models/*_cache*/
+
+# Leaderboards and evaluation dumps
+*_leaderboard.csv
+*_highconf_trades.csv
+
+# ============================================
+# RESEARCH OUTPUT FOLDERS
+# ============================================
+output/
+*/output/
+results/
+*/results/
+reports/
+*/reports/
+
+# ============================================
+# PERSONAL OR ABSOLUTE PATH FOLDERS
+# ============================================
+C:/PERSONAL_DATA/
+PERSONAL_DATA/
+*/PERSONAL_DATA/*
+
+# ============================================
+# WINDOWS TRASH
+# ============================================
+$RECYCLE.BIN/
+System Volume Information/
+
+# ============================================
+# BY DEFAULT IGNORE EVERYTHING LARGE…
+# but allow config files & scripts
+# ============================================
+*.sh
+*.bat
+
+# Keep only:
+!*.py
+!*.md
+!*.ini
+!*.cfg
+!config/*.json
+!*.toml
 
 
-# Machine learning model files
-*.json       # XGBoost
-*.pkl        # LightGBM (or other pickled models)
-*.cbm        # CatBoost
-*.txt        # LightGBM booster save_model
+*.cs
+*.c
