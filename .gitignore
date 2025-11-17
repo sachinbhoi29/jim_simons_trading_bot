@@ -221,3 +221,7 @@ System Volume Information/
 !*.cfg
 !config/*.json
 !*.toml
+
+
+*.cs
+*.c
