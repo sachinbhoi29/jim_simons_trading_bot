@@ -16,7 +16,7 @@ DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/
 MODEL_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/models/"
 TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/"
 
-TARGET_THRESHOLD = 0.005       # top 0.1% future return
+TARGET_THRESHOLD = 0.003       # top 0.1% future return
 MIN_TRADES = 1000              # minimum high-confidence trades
 PRECISION_FLOOR = 0.80         # minimum acceptable precision
 
@@ -40,7 +40,7 @@ df['Ticker'] = df['Ticker'].astype(str)
 df['target_bin'] = (df['future_return'] > TARGET_THRESHOLD).astype(int)
 
 #for short
-df['target_bin'] = (df['future_return'] < -TARGET_THRESHOLD).astype(int)
+# df['target_bin'] = (df['future_return'] < -TARGET_THRESHOLD).astype(int)
 
 print("Target counts:\n", df['target_bin'].value_counts())
 
@@ -199,7 +199,7 @@ def evaluate_model(name, model, X_test, y_test):
     
     # Save model
     joblib.dump(model, f"{MODEL_SAVE_PATH}{name}_model_highconf_gridsearch_optimized.pkl")
-    high_conf_trades_sorted.to_csv(f"{TRADES_SAVE_PATH}{name}_highconf_trades.csv", index=False)
+    # high_conf_trades_sorted.to_csv(f"{TRADES_SAVE_PATH}{name}_highconf_trades.csv", index=False)
 
 # Evaluate & save
 evaluate_model("XGBoost", best_xgb, X_test, y_test)
