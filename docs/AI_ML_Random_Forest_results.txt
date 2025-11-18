@@ -144,7 +144,7 @@ Sum of future returns (all trades, percent per trade average): 0.70%
 ==================================================================
 
 
-2d reutrns 3%, seen data, non-optimized, v1 features
+2d reutrns 3%, unseen data, non-optimized, v1 features
 
 ================= HIGH-CONFIDENCE TRADE SUMMARY =================
 Percent of all opportunities taken: 1.99%
@@ -189,7 +189,7 @@ Sum of future returns (all trades, percent per trade average): 1.42%
 ==================================================================
 
 
-2d reutrns 3%, seen data, non-optimized, v4 features
+2d reutrns 3%, unseen data, non-optimized, v4 features
 
 ================= HIGH-CONFIDENCE TRADE SUMMARY =================
 Percent of all opportunities taken: 12.53%
@@ -205,4 +205,142 @@ Sum of future returns (all trades, decimal): 40.5435
 Sum of future returns (all trades, percent per trade average): 0.93%
 ==================================================================
 
+
+2d reutrns 3%, seen data, non-optimized, v1 features
+
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 12.30%
+Total trades selected: 4313
+True Positives (real winners): 2908
+False Positives (fake signals): 1405
+Precision (TP / TP+FP): 0.6742
+Recall: 0.1877
+TP-to-FP ratio: 2.07
+Average win: 0.0250
+Average loss: 0.0147
+Sum of future returns (all trades, decimal): 61.1948
+Sum of future returns (all trades, percent per trade average): 1.42%
+==================================================================
+
+3d reutrns 3%, un seen data, non-optimized, v1 features
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 12.44%
+Total trades selected: 4351
+True Positives (real winners): 2812
+False Positives (fake signals): 1539
+Precision (TP / TP+FP): 0.6463
+Recall: 0.1748
+TP-to-FP ratio: 1.83
+Average win: 0.0294
+Average loss: 0.0200
+Sum of future returns (all trades, decimal): 60.6589
+Sum of future returns (all trades, percent per trade average): 1.39%
+==================================================================
+
+3d reutrns 4%, un seen data, non-optimized, v1 features
+!!!!!!!!!!This is second Best on unseen!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 12.56%
+Total trades selected: 4395
+True Positives (real winners): 2972
+False Positives (fake signals): 1423
+Precision (TP / TP+FP): 0.6762
+Recall: 0.1914
+TP-to-FP ratio: 2.09
+Average win: 0.0304
+Average loss: 0.0179
+Sum of future returns (all trades, decimal): 76.7750
+Sum of future returns (all trades, percent per trade average): 1.75%
+==================================================================
+
+
+3d reutrns 7%, un seen data, non-optimized, v1 features
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 12.41%
+Total trades selected: 4343
+True Positives (real winners): 2863
+False Positives (fake signals): 1480
+Precision (TP / TP+FP): 0.6592
+Recall: 0.1843
+TP-to-FP ratio: 1.93
+Average win: 0.0316
+Average loss: 0.0203
+Sum of future returns (all trades, decimal): 71.2521
+Sum of future returns (all trades, percent per trade average): 1.64%
+==================================================================
+
+
+
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 12.36%
+Total trades selected: 4305
+True Positives (real winners): 2569
+False Positives (fake signals): 1736
+Precision (TP / TP+FP): 0.5967
+Recall: 0.1731
+TP-to-FP ratio: 1.48
+Average win: 0.0381
+Average loss: 0.0252
+Sum of future returns (all trades, decimal): 76.5211
+Sum of future returns (all trades, percent per trade average): 1.78%
+==================================================================
+
+!!!!!!!!!This is so far the best of best, that too, not optimized!!!!!!!!!!!!!!!!!
+5d reutrns 5%, un seen data, non-optimized, v1 features
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 12.41%
+Total trades selected: 4320
+True Positives (real winners): 2877
+False Positives (fake signals): 1443
+Precision (TP / TP+FP): 0.6660
+Recall: 0.1784
+TP-to-FP ratio: 1.99
+Average win: 0.0384
+Average loss: 0.0231
+Sum of future returns (all trades, decimal): 90.2472
+Sum of future returns (all trades, percent per trade average): 2.09%
+==================================================================
+
+
+5d reutrns 7%, un seen data, non-optimized, v1 features
+
+
+Proceed with optimization on this, you can try 3d 4%
+!!!!!!!!!!This is second Best on unseen!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+3d reutrns 4%, un seen data, non-optimized, v1 features
+
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 12.50%
+Total trades selected: 4373
+True Positives (real winners): 2857
+False Positives (fake signals): 1516
+Precision (TP / TP+FP): 0.6533
+Recall: 0.2076
+TP-to-FP ratio: 1.88
+Average win: 0.0929
+Average loss: 0.0176
+Sum of future returns (all trades, decimal): 287.8714
+Sum of future returns (all trades, percent per trade average): 6.58%
+==================================================================
+!!!!!!!!!! Unbelivable expectations of 6.58, average win is, but the data is subset of the trained data
+Average win per trade = +9.29% (over the 3/5 day horizon?)
+If your average winning trade is +9%, that is extremely, extremely good
+
+
+!!!!!!!!!This is so far the best of best, that too, not optimized!!!!!!!!!!!!!!!!!
+5d reutrns 5%, un seen data, non-optimized, v1 features
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 12.62%
+Total trades selected: 2981
+True Positives (real winners): 1945
+False Positives (fake signals): 1036
+Precision (TP / TP+FP): 0.6525
+Recall: 0.1863
+TP-to-FP ratio: 1.88
+Average win: 0.0616
+Average loss: 0.0345
+Sum of future returns (all trades, decimal): 94.5362
+Sum of future returns (all trades, percent per trade average): 3.17%
+==================================================================
+# cumplete unseen data, no training data subset
 

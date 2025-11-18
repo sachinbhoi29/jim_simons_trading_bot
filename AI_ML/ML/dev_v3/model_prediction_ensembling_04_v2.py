@@ -4,18 +4,18 @@ import joblib
 from sklearn.metrics import precision_score
 
 # ===============================
-# ⚙️ CONFIGURATION (ALL PARAMETERS HERE)
+# CONFIGURATION (ALL PARAMETERS HERE)
 # ===============================
 MODEL_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/models/"
 DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/normalized_data_for_ml.csv"
 TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/"
 
-TARGET_THRESHOLD = 0.004      # Minimum future return to count as positive
+TARGET_THRESHOLD = 0.005      # Minimum future return to count as positive
 PRECISION_FLOOR = 0.50        # Minimum acceptable precision for threshold selection
 MIN_TRADES = 500              # Minimum trades at each threshold to consider
 TOP_LIMIT = None               # Max number of trades to select (None = no limit)
 THRESHOLD_SEARCH_STEPS = 50   # Number of candidate thresholds to scan between 0.5-0.99
-THRESHOLD = 0.6              #!!!!!!!!!!!!!!!!! Threshold for high-confidence trades               
+THRESHOLD = 0.595              #!!!!!!!!!!!!!!!!! Threshold for high-confidence trades               
 # ===============================
 # 1️⃣ LOAD DATA
 # ===============================
@@ -37,12 +37,12 @@ print(f"Total samples: {len(X)} | Positive rate: {y.mean():.4f}")
 # 2️⃣ LOAD MODELS
 # ===============================
 print("\nLoading trained models...")
-# best_xgb = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_3d_3p_bull.pkl")
-# best_lgb = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_3d_3p_bull.pkl")
-# best_cat = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_3d_3p_bull.pkl")
-best_xgb = joblib.load(MODEL_PATH + "XGBoost_model_highconf_fv1_3d_4p_call.pkl")
-best_lgb = joblib.load(MODEL_PATH + "LightGBM_model_highconf_fv1_3d_4p_call.pkl")
-best_cat = joblib.load(MODEL_PATH + "CatBoost_model_highconf_fv1_3d_4p_call.pkl")
+best_xgb = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_fv1_5d_5p_call.pkl")
+best_lgb = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_fv1_5d_5p_call.pkl")
+best_cat = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_fv1_5d_5p_call.pkl")
+# best_xgb = joblib.load(MODEL_PATH + "XGBoost_model_highconf_fv1_5d_7p_call.pkl")
+# best_lgb = joblib.load(MODEL_PATH + "LightGBM_model_highconf_fv1_5d_7p_call.pkl")
+# best_cat = joblib.load(MODEL_PATH + "CatBoost_model_highconf_fv1_5d_7p_call.pkl")
 
 
 # ===============================
