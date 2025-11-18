@@ -4,18 +4,18 @@ import joblib
 from sklearn.metrics import precision_score
 
 # ===============================
-# CONFIGURATION (ALL PARAMETERS HERE)
+# ⚙️ CONFIGURATION (ALL PARAMETERS HERE)
 # ===============================
 MODEL_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/models/"
 DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/normalized_data_for_ml.csv"
 TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/"
 
-TARGET_THRESHOLD = 0.005      # Minimum future return to count as positive
+TARGET_THRESHOLD = 0.003      # Minimum future return to count as positive
 PRECISION_FLOOR = 0.50        # Minimum acceptable precision for threshold selection
 MIN_TRADES = 500              # Minimum trades at each threshold to consider
-TOP_LIMIT = None               # Max number of trades to select (None = no limit)
+TOP_LIMIT = None              # Max number of trades to select (None = no limit)
 THRESHOLD_SEARCH_STEPS = 50   # Number of candidate thresholds to scan between 0.5-0.99
-THRESHOLD = 0.595              #!!!!!!!!!!!!!!!!! Threshold for high-confidence trades               
+THRESHOLD = 0.60              # !!!!!!!!!!!!!!!!! Threshold for high-confidence trades               
 # ===============================
 # 1️⃣ LOAD DATA
 # ===============================
@@ -33,27 +33,81 @@ y = df["target_bin"]
 
 print(f"Total samples: {len(X)} | Positive rate: {y.mean():.4f}")
 
-# ===============================
-# 2️⃣ LOAD MODELS
-# ===============================
 print("\nLoading trained models...")
-best_xgb = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_fv1_5d_5p_call.pkl")
-best_lgb = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_fv1_5d_5p_call.pkl")
-best_cat = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_fv1_5d_5p_call.pkl")
-# best_xgb = joblib.load(MODEL_PATH + "XGBoost_model_highconf_fv1_5d_7p_call.pkl")
-# best_lgb = joblib.load(MODEL_PATH + "LightGBM_model_highconf_fv1_5d_7p_call.pkl")
-# best_cat = joblib.load(MODEL_PATH + "CatBoost_model_highconf_fv1_5d_7p_call.pkl")
+
+# =========================================
+# Load ALL 9 models (3 targets × 3 models)
+# =========================================
 
 
-# ===============================
-# 3️⃣ GENERATE ENSEMBLE PROBABILITIES
-# ===============================
+# --- 3d 3% models ---
+xgb_1d2 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_1d_2p_call.pkl")
+lgb_1d2 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_1d_2p_call.pkl")
+cat_1d2 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_1d_2p_call.pkl")
+
+
+# --- 3d 3% models ---
+xgb_3d3 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_3d_3p_call.pkl")
+lgb_3d3 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_3d_3p_call.pkl")
+cat_3d3 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_3d_3p_call.pkl")
+
+# --- 3d 5% models ---
+xgb_3d5 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_3d_5p_call.pkl")
+lgb_3d5 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_3d_5p_call.pkl")
+cat_3d5 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_3d_5p_call.pkl")
+
+
+# # --- 5d 5% models ---
+xgb_5d3 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_5d_3p_call.pkl")
+lgb_5d3 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_5d_3p_call.pkl")
+cat_5d3 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_5d_3p_call.pkl")
+
+# # --- 5d 5% models ---
+# xgb_5d5 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_5d_5p_bull.pkl")
+# lgb_5d5 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_5d_5p_bull.pkl")
+# cat_5d5 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_5d_5p_bull.pkl")
+
+# =========================================
+# Generate probabilities for all models
+# =========================================
 print("\nGenerating ensemble probabilities...")
-xgb_prob = best_xgb.predict_proba(X)[:, 1]
-lgb_prob = best_lgb.predict_proba(X)[:, 1]
-cat_prob = best_cat.predict_proba(X)[:, 1]
-df["prob"] = (xgb_prob + lgb_prob + cat_prob) / 3
-# df["prob"] = (xgb_prob + lgb_prob ) / 2
+
+# 1d2
+p_xgb_1d2 = xgb_1d2.predict_proba(X)[:, 1]
+p_lgb_1d2 = lgb_1d2.predict_proba(X)[:, 1]
+p_cat_1d2 = cat_1d2.predict_proba(X)[:, 1]
+
+
+# 3d3
+p_xgb_3d3 = xgb_3d3.predict_proba(X)[:, 1]
+p_lgb_3d3 = lgb_3d3.predict_proba(X)[:, 1]
+p_cat_3d3 = cat_3d3.predict_proba(X)[:, 1]
+
+# 3d5
+p_xgb_3d5 = xgb_3d5.predict_proba(X)[:, 1]
+p_lgb_3d5 = lgb_3d5.predict_proba(X)[:, 1]
+p_cat_3d5 = cat_3d5.predict_proba(X)[:, 1]
+
+# 5d3
+p_xgb_5d3 = xgb_5d3.predict_proba(X)[:, 1]
+p_lgb_5d3 = lgb_5d3.predict_proba(X)[:, 1]
+p_cat_5d3 = cat_5d3.predict_proba(X)[:, 1]
+
+# # 5d5
+# p_xgb_5d5 = xgb_5d5.predict_proba(X)[:, 1]
+# p_lgb_5d5 = lgb_5d5.predict_proba(X)[:, 1]
+# p_cat_5d5 = cat_5d5.predict_proba(X)[:, 1]
+
+# =========================================
+# Final Combined Probability (9-model ensemble)
+# =========================================
+df["prob"] = (
+    p_xgb_1d2 + p_lgb_1d2 + p_cat_1d2 +
+    p_xgb_3d3 + p_lgb_3d3 + p_cat_3d3 +
+    p_xgb_3d5 + p_lgb_3d5 + p_cat_3d5 + 
+    p_xgb_5d3 + p_lgb_5d3 + p_cat_5d3
+ ) / 12
+
 
 print("\nTop probability stats:\n", df["prob"].describe(percentiles=[0.9, 0.95, 0.99]))
 

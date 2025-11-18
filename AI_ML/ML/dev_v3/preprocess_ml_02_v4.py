@@ -1,3 +1,9 @@
+#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
+#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
+#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
+#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
+#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
+#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
 import pandas as pd
 import numpy as np
 import os
@@ -342,7 +348,7 @@ def apply_minmax_scaling(df, feature_cols):
 # Script Entry Point (NO SCALING)
 # ========================================
 if __name__ == "__main__":
-    SCALER_PICKLE = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/scaler.pkl"
+    SCALER_PICKLE = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/scaler_v4.pkl"
 
     input_path = (
         "C:/PERSONAL_DATA/Startups/Stocks/"

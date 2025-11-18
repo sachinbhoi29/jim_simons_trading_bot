@@ -9,3 +9,12 @@ The fibo shows from both the tends, sometimes the top is 100% while other times 
 
 
 Features
+
+Ensemble 9 models
+3 Model 1d@1% — large sample, captures intraday/very short momentum, high recall, noisy but frequent. Good for flow and volume.
+
+3 models 3d@3% — medium-term momentum, fewer positives, better signal/noise ratio, good per-trade returns.
+
+3 models 5d@5% — rarer, high-confidence moves; good for picking larger trends and spikes.
+
+Together they cover multiple time scales and trade sizes. Ensembleing them lets you harvest both frequency (1d) and magnitude/confidence (5d).
