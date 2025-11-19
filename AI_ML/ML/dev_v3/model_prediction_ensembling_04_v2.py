@@ -1,3 +1,7 @@
+# look for long or short
+# check for threshold
+# check for model selected, model should match with long or short
+
 import pandas as pd
 import numpy as np
 import joblib
@@ -10,12 +14,12 @@ MODEL_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML
 DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/normalized_data_for_ml.csv"
 TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/"
 
-TARGET_THRESHOLD = 0.005      # Minimum future return to count as positive
+TARGET_THRESHOLD = 0.002      # Minimum future return to count as positive
 PRECISION_FLOOR = 0.50        # Minimum acceptable precision for threshold selection
 MIN_TRADES = 500              # Minimum trades at each threshold to consider
 TOP_LIMIT = None               # Max number of trades to select (None = no limit)
 THRESHOLD_SEARCH_STEPS = 50   # Number of candidate thresholds to scan between 0.5-0.99
-THRESHOLD = 0.532              #!!!!!!!!!!!!!!!!! Threshold for high-confidence trades               
+THRESHOLD = 0.655              #!!!!!!!!!!!!!!!!! Threshold for high-confidence trades               
 # ===============================
 # 1️⃣ LOAD DATA
 # ===============================
@@ -23,7 +27,13 @@ print("Loading data...")
 df = pd.read_csv(DATA_PATH)
 df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 df["Ticker"] = df["Ticker"].astype(str)
-df["target_bin"] = (df["future_return"] > TARGET_THRESHOLD).astype(int)
+
+# for long
+# df["target_bin"] = (df["future_return"] > TARGET_THRESHOLD).astype(int)
+
+# for Short
+df["target_bin"] = (df["future_return"] < -TARGET_THRESHOLD).astype(int)
+
 
 exclude = ["Date", "Ticker", "future_return", "target_bin"]
 features = [c for c in df.columns if c not in exclude]
@@ -37,12 +47,9 @@ print(f"Total samples: {len(X)} | Positive rate: {y.mean():.4f}")
 # 2️⃣ LOAD MODELS
 # ===============================
 print("\nLoading trained models...")
-best_xgb = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_fv1_5d_5p_call.pkl")
-best_lgb = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_fv1_5d_5p_call.pkl")
-best_cat = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_fv1_5d_5p_call.pkl")
-# best_xgb = joblib.load(MODEL_PATH + "XGBoost_model_highconf_fv1_5d_7p_call.pkl")
-# best_lgb = joblib.load(MODEL_PATH + "LightGBM_model_highconf_fv1_5d_7p_call.pkl")
-# best_cat = joblib.load(MODEL_PATH + "CatBoost_model_highconf_fv1_5d_7p_call.pkl")
+best_xgb = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_fv1_1d_2p_short.pkl")
+best_lgb = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_fv1_1d_2p_short.pkl")
+best_cat = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_fv1_1d_2p_short.pkl")
 
 
 # ===============================
@@ -110,11 +117,22 @@ recall_final = tp / df["target_bin"].sum() if df["target_bin"].sum() > 0 else 0
 # -------------------------------
 # Compute average win/loss and normalized expectation
 # -------------------------------
-wins = selected[selected["future_return"] > 0]["future_return"]
-losses = selected[selected["future_return"] <= 0]["future_return"]
+# for long
+# wins = selected[selected["future_return"] > 0]["future_return"]
+# losses = selected[selected["future_return"] <= 0]["future_return"]
+# avg_win = wins.mean() if len(wins) > 0 else 0
+# avg_loss = -losses.mean() if len(losses) > 0 else 0  # take abs
 
-avg_win = wins.mean() if len(wins) > 0 else 0
-avg_loss = -losses.mean() if len(losses) > 0 else 0  # take abs
+
+#for short 
+wins = selected[selected["future_return"] < 0]["future_return"]     # price dropped → good short
+losses = selected[selected["future_return"] >= 0]["future_return"]  # price rose → bad short
+avg_win = -wins.mean() if len(wins) > 0 else 0    # convert short win (negative) to positive
+avg_loss = losses.mean() if len(losses) > 0 else 0  # convert loss (positive) to positive
+
+
+
+
 
 P_win = len(wins) / len(selected)
 P_loss = len(losses) / len(selected)

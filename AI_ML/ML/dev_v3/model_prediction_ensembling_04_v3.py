@@ -1,3 +1,6 @@
+# look for long or short
+# check for threshold
+# check for models selected for ensembling and long or short
 import pandas as pd
 import numpy as np
 import joblib
@@ -15,7 +18,7 @@ PRECISION_FLOOR = 0.50        # Minimum acceptable precision for threshold selec
 MIN_TRADES = 500              # Minimum trades at each threshold to consider
 TOP_LIMIT = None              # Max number of trades to select (None = no limit)
 THRESHOLD_SEARCH_STEPS = 50   # Number of candidate thresholds to scan between 0.5-0.99
-THRESHOLD = 0.507              # !!!!!!!!!!!!!!!!! Threshold for high-confidence trades               
+THRESHOLD = 0.559              # !!!!!!!!!!!!!!!!! Threshold for high-confidence trades               
 # ===============================
 # 1️⃣ LOAD DATA
 # ===============================
@@ -23,7 +26,13 @@ print("Loading data...")
 df = pd.read_csv(DATA_PATH)
 df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 df["Ticker"] = df["Ticker"].astype(str)
+
+# for long
 df["target_bin"] = (df["future_return"] > TARGET_THRESHOLD).astype(int)
+
+# # for Short
+# df["target_bin"] = (df["future_return"] < -TARGET_THRESHOLD).astype(int)
+
 
 exclude = ["Date", "Ticker", "future_return", "target_bin"]
 features = [c for c in df.columns if c not in exclude]
@@ -52,6 +61,12 @@ lgb_5d5 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized
 cat_5d5 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_fv1_5d_5p_call.pkl")
 
 
+# # --- 7d 7% models ---
+# xgb_7d7 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_fv1_7d_7p_call.pkl")
+# lgb_7d7 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_fv1_7d_7p_call.pkl")
+# cat_7d7 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_fv1_7d_7p_call.pkl")
+
+
 # =========================================
 # Generate probabilities for all models
 # =========================================
@@ -68,14 +83,20 @@ p_xgb_5d5 = xgb_5d5.predict_proba(X)[:, 1]
 p_lgb_5d5 = lgb_5d5.predict_proba(X)[:, 1]
 p_cat_5d5 = cat_5d5.predict_proba(X)[:, 1]
 
+# # 7d7
+# p_xgb_7d7 = xgb_7d7.predict_proba(X)[:, 1]
+# p_lgb_7d7 = lgb_7d7.predict_proba(X)[:, 1]
+# p_cat_7d7 = cat_7d7.predict_proba(X)[:, 1]
+
 
 # =========================================
 # Final Combined Probability (9-model ensemble)
 # =========================================
 df["prob"] = (
     p_xgb_3d4 + p_lgb_3d4 + p_cat_3d4 +
-    p_xgb_5d5 + p_lgb_5d5 + p_cat_5d5 
- ) / 6
+    p_xgb_5d5 + p_lgb_5d5 + p_cat_5d5 )/6
+    # p_xgb_7d7 + p_lgb_7d7 + p_cat_7d7 
+#  ) / 6
 
 
 print("\nTop probability stats:\n", df["prob"].describe(percentiles=[0.9, 0.95, 0.99]))
@@ -133,11 +154,18 @@ recall_final = tp / df["target_bin"].sum() if df["target_bin"].sum() > 0 else 0
 # -------------------------------
 # Compute average win/loss and normalized expectation
 # -------------------------------
+# for long
 wins = selected[selected["future_return"] > 0]["future_return"]
 losses = selected[selected["future_return"] <= 0]["future_return"]
-
 avg_win = wins.mean() if len(wins) > 0 else 0
 avg_loss = -losses.mean() if len(losses) > 0 else 0  # take abs
+
+#for short 
+# wins = selected[selected["future_return"] < 0]["future_return"]     # price dropped → good short
+# losses = selected[selected["future_return"] >= 0]["future_return"]  # price rose → bad short
+# avg_win = -wins.mean() if len(wins) > 0 else 0    # convert short win (negative) to positive
+# avg_loss = losses.mean() if len(losses) > 0 else 0  # convert loss (positive) to positive
+
 
 P_win = len(wins) / len(selected)
 P_loss = len(losses) / len(selected)
