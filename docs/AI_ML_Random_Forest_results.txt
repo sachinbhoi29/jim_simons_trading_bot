@@ -85,9 +85,16 @@ TP-to-FP ratio: 2.37
 
 
 
---------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------
 
-model_highconf_gridsearch_optimized_3d_5p_bull
+v1 features are minimal features
+v4 features are extensive features
+3d is 3 days later returns, in fraction
+3p or 5p 0.3 or 0.5% are the percentage return model trained on
+bull or call are positive trades
+seen and unseen are the data on which this is ran
+
+model_highconf_gridsearch_optimized_3d_5p_call
 ================= HIGH-CONFIDENCE TRADE SUMMARY =================
 Percent of all opportunities taken: 8.07%
 Total trades selected: 2792
@@ -270,7 +277,7 @@ Sum of future returns (all trades, percent per trade average): 1.64%
 ==================================================================
 
 
-
+5d reutrns 7%, un seen data, non-optimized, v1 features
 ================= HIGH-CONFIDENCE TRADE SUMMARY =================
 Percent of all opportunities taken: 12.36%
 Total trades selected: 4305
@@ -307,7 +314,7 @@ Sum of future returns (all trades, percent per trade average): 2.09%
 
 Proceed with optimization on this, you can try 3d 4%
 !!!!!!!!!!This is second Best on unseen!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-3d reutrns 4%, un seen data, non-optimized, v1 features
+3d reutrns 4%, un seen data, optimized, v1 features
 
 ================= HIGH-CONFIDENCE TRADE SUMMARY =================
 Percent of all opportunities taken: 12.50%
@@ -328,7 +335,7 @@ If your average winning trade is +9%, that is extremely, extremely good
 
 
 !!!!!!!!!This is so far the best of best, that too, not optimized!!!!!!!!!!!!!!!!!
-5d reutrns 5%, un seen data, non-optimized, v1 features
+5d reutrns 5%, un seen data, optimized, v1 features
 ================= HIGH-CONFIDENCE TRADE SUMMARY =================
 Percent of all opportunities taken: 12.62%
 Total trades selected: 2981
@@ -344,3 +351,105 @@ Sum of future returns (all trades, percent per trade average): 3.17%
 ==================================================================
 # cumplete unseen data, no training data subset
 
+
+
+
+Ensembled 6 models for data 5d 5%
+models used
+Ensembled
+3d reutrns 4%, un seen data, optimized, v1 features +
+5d reutrns 5%, un seen data, optimized, v1 features
+
+
+only 5d reutrns 5%, un seen data, optimized, v1 features
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 12.61%
+Total trades selected: 6416
+True Positives (real winners): 4356
+False Positives (fake signals): 2060
+Precision (TP / TP+FP): 0.6789
+Recall: 0.1865
+TP-to-FP ratio: 2.11
+Average win: 0.0590
+Average loss: 0.0341
+Sum of future returns (all trades, decimal): 210.3913
+Sum of future returns (all trades, percent per trade average): 3.28%
+==================================================================
+
+Ensembeled of 3d and 5d
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 12.66%
+Total trades selected: 6443
+True Positives (real winners): 4485
+False Positives (fake signals): 1958
+Precision (TP / TP+FP): 0.6961  !!! very high and unbelivable for completly unseen data
+Recall: 0.1920
+TP-to-FP ratio: 2.29
+Average win: 0.0598 ! almost double
+Average loss: 0.0322
+Sum of future returns (all trades, decimal): 227.6755 
+Sum of future returns (all trades, percent per trade average): 3.53%   ! splendid, better than single model
+==================================================================
+
+! in conclusion, Ensembling 3d and 5d is better, as the avg loss per trade is less
+
+Further validation on same model
+
+only 5d reutrns 5%, un seen data, optimized, v1 features
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 12.53%
+Total trades selected: 9411
+True Positives (real winners): 6468
+False Positives (fake signals): 2943
+Precision (TP / TP+FP): 0.6873
+Recall: 0.1829
+TP-to-FP ratio: 2.20
+Average win: 0.0390
+Average loss: 0.0243
+Sum of future returns (all trades, decimal): 212.2781
+Sum of future returns (all trades, percent per trade average): 2.26%
+==================================================================
+
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 20.00%
+Total trades selected: 15016
+True Positives (real winners): 9698
+False Positives (fake signals): 5318
+Precision (TP / TP+FP): 0.6458
+Recall: 0.2742
+TP-to-FP ratio: 1.82
+Average win: 0.0365
+Average loss: 0.0242
+Sum of future returns (all trades, decimal): 277.8522
+Sum of future returns (all trades, percent per trade average): 1.85%
+==================================================================
+
+
+Ensembeled of 3d and 5d
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 12.51%
+Total trades selected: 9389
+True Positives (real winners): 6547
+False Positives (fake signals): 2842
+Precision (TP / TP+FP): 0.6973
+Recall: 0.1851
+TP-to-FP ratio: 2.30
+Average win: 0.0390
+Average loss: 0.0226
+Sum of future returns (all trades, decimal): 224.1391
+Sum of future returns (all trades, percent per trade average): 2.39%
+==================================================================
+
+================= HIGH-CONFIDENCE TRADE SUMMARY =================
+Percent of all opportunities taken: 20.07%
+Total trades selected: 15066
+True Positives (real winners): 9936
+False Positives (fake signals): 5130
+Precision (TP / TP+FP): 0.6595
+Recall: 0.2809
+TP-to-FP ratio: 1.94
+Average win: 0.0364
+Average loss: 0.0236
+Sum of future returns (all trades, decimal): 295.9123
+Sum of future returns (all trades, percent per trade average): 1.96%
+==================================================================
