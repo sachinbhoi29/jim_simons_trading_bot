@@ -596,7 +596,7 @@ Sum of future returns (all trades, percent per trade average): 2.62%
 
 
 
-Finally, for short 
+Finally, for short trades
 1d -2% v1 features grid search optimized model results
 ================= HIGH-CONFIDENCE TRADE SUMMARY =================
 Percent of all opportunities taken: 12.44%
@@ -613,3 +613,17 @@ Sum of future returns (all trades, percent per trade average): -1.42%
 ==================================================================
 Conclusion, in short duration of 1 day the accuracy is high but the expectation is low because 
 the avg win and avg loss ratio is low. but still considerable
+
+
+Across ALL your tests, one pattern repeats:
+Ensembling (3d4% + 5d5%) ALWAYS beats single models
+
+FINAL TRADING SYSTEM (recommended)
+LONG SYSTEM (multi-day returns)
+Use ENSEMBLE = 3d4% + 5d5%
+SHORT SYSTEM (1-day)
+Use 1d –2% optimized short model
+
+
+The future return is incorrec because you are using the wrong metrix, you are using the today's indicator but
+the returns are based on the previous days 

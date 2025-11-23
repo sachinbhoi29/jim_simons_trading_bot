@@ -1,3 +1,4 @@
+#!!!!!!!!!!!!!! Why using threshold here, it is not correct, this model changes the outcome based on threshold selected, it is incorrect
 # look for long or short
 # check for threshold
 # check for model selected, model should match with long or short
@@ -19,13 +20,13 @@ PRECISION_FLOOR = 0.50        # Minimum acceptable precision for threshold selec
 MIN_TRADES = 500              # Minimum trades at each threshold to consider
 TOP_LIMIT = None               # Max number of trades to select (None = no limit)
 THRESHOLD_SEARCH_STEPS = 50   # Number of candidate thresholds to scan between 0.5-0.99
-THRESHOLD = 0.655              #!!!!!!!!!!!!!!!!! Threshold for high-confidence trades               
+THRESHOLD = 0.68              #!!!!!!!!!!!!!!!!! Threshold for high-confidence trades               
 # ===============================
 # 1️⃣ LOAD DATA
 # ===============================
 print("Loading data...")
 df = pd.read_csv(DATA_PATH)
-df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+# df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 df["Ticker"] = df["Ticker"].astype(str)
 
 # for long

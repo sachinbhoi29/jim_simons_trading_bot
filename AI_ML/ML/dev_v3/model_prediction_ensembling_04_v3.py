@@ -1,3 +1,4 @@
+#!!!!!!!!!!!!!! Why using threshold here, it is not correct, this model changes the outcome based on threshold selected, it is incorrect
 # look for long or short
 # check for threshold
 # check for models selected for ensembling and long or short
@@ -18,13 +19,13 @@ PRECISION_FLOOR = 0.50        # Minimum acceptable precision for threshold selec
 MIN_TRADES = 500              # Minimum trades at each threshold to consider
 TOP_LIMIT = None              # Max number of trades to select (None = no limit)
 THRESHOLD_SEARCH_STEPS = 50   # Number of candidate thresholds to scan between 0.5-0.99
-THRESHOLD = 0.559              # !!!!!!!!!!!!!!!!! Threshold for high-confidence trades               
+THRESHOLD = 0.50              # !!!!!!!!!!!!!!!!! Threshold for high-confidence trades               
 # ===============================
 # 1️⃣ LOAD DATA
 # ===============================
 print("Loading data...")
 df = pd.read_csv(DATA_PATH)
-df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+# df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 df["Ticker"] = df["Ticker"].astype(str)
 
 # for long
@@ -50,21 +51,21 @@ print("\nLoading trained models...")
 
 
 # --- 3d 4% models ---
-xgb_3d4 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_fv1_3d_4p_call.pkl")
-lgb_3d4 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_fv1_3d_4p_call.pkl")
-cat_3d4 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_fv1_3d_4p_call.pkl")
+xgb_3d4 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_fv1_3d_4p_long.pkl")
+lgb_3d4 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_fv1_3d_4p_long.pkl")
+cat_3d4 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_fv1_3d_4p_long.pkl")
 
 
 # --- 5d 5% models ---
-xgb_5d5 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_fv1_5d_5p_call.pkl")
-lgb_5d5 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_fv1_5d_5p_call.pkl")
-cat_5d5 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_fv1_5d_5p_call.pkl")
+xgb_5d5 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_fv1_5d_5p_long.pkl")
+lgb_5d5 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_fv1_5d_5p_long.pkl")
+cat_5d5 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_fv1_5d_5p_long.pkl")
 
 
 # # --- 7d 7% models ---
-# xgb_7d7 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_fv1_7d_7p_call.pkl")
-# lgb_7d7 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_fv1_7d_7p_call.pkl")
-# cat_7d7 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_fv1_7d_7p_call.pkl")
+# xgb_7d7 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_fv1_7d_7p_long.pkl")
+# lgb_7d7 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_fv1_7d_7p_long.pkl")
+# cat_7d7 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_fv1_7d_7p_long.pkl")
 
 
 # =========================================
