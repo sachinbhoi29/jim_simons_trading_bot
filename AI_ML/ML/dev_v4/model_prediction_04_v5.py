@@ -11,7 +11,7 @@ TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy
 
 # FIXED threshold on model ensemble probability to select signals
 TARGET_THRESHOLD = 0.005
-THRESHOLD = 0.68              # FIXED threshold for selecting trades (model-derived)
+THRESHOLD = 0.559              # FIXED threshold for selecting trades (model-derived)
 
 # ===============================
 # 1️⃣ LOAD DATA
@@ -35,9 +35,9 @@ print(f"Total samples: {len(X)}")
 # 2️⃣ LOAD MODELS
 # ===============================
 print("\nLoading trained models...")
-xgb_3d4 = joblib.load(MODEL_PATH + "XGBoost_model_highconf.pkl")
-lgb_3d4 = joblib.load(MODEL_PATH + "LightGBM_model_highconf.pkl")
-cat_3d4 = joblib.load(MODEL_PATH + "CatBoost_model_highconf.pkl")
+xgb_3d4 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_gridsearch_optimized_3d_4p_v1_long.pkl")
+lgb_3d4 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_gridsearch_optimized_3d_4p_v1_long.pkl")
+cat_3d4 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_gridsearch_optimized_3d_4p_v1_long.pkl")
 
 # ===============================
 # 3️⃣ GENERATE ENSEMBLE PROBABILITIES
