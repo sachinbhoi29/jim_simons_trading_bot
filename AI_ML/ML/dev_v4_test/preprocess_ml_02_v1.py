@@ -221,6 +221,7 @@ def preprocess_combined_full(df: pd.DataFrame, smooth=True) -> pd.DataFrame:
 
     ml_cols = [
             "Date", "Ticker", "future_return",
+            "Sector_encoded",
             # Price relatives & core
             "EMA_diff", "EMA_20_rel", "EMA_50_rel", "VWAP_rel",
             "BB_mid_20_rel", "BB_upper_20_rel", "BB_lower_20_rel",
@@ -301,9 +302,9 @@ def apply_minmax_scaling(df, feature_cols, SCALER_PICKLE):
 # 3️⃣ Script Entry
 # ========================================
 if __name__ == "__main__":
-    SCALER_PICKLE = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/scaler_v1.pkl"  # Update path as needed
-    input_path = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/features_ready.csv"  # Update path as needed
-    output_path = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/normalized_data_for_ml.csv"  # Update path as needed
+    SCALER_PICKLE = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4_test/data/scaler_v1.pkl"  # Update path as needed
+    input_path = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4_test/data/features_ready.csv"  # Update path as needed
+    output_path = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4_test/data/normalized_data_for_ml.csv"  # Update path as needed
 
     print("Loading raw features...")
     df_raw = pd.read_csv(input_path)

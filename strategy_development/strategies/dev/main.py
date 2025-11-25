@@ -1,73 +1,22 @@
+# check for future return value
+# check for stocks selected and date range
 from pipeline.fib_strategy import fibPipeline
 from pipeline.generic_strategy import genericStrategyPipeline
-from pipeline.aiml_pipeline import AIMLFeaturePipeline
+# from pipeline.aiml_pipeline import AIMLFeaturePipeline
+from pipeline.aiml_pipeline_v2_test import AIMLFeaturePipelineV2
+from config.config import SMALL_CAP_TICKERS, LARGE_CAP_TICKERS, MID_CAP_TICKERS    
 
 
 if __name__ == '__main__':
     # Create a singleton instance for convenience
-    aiml_pipeline = AIMLFeaturePipeline(future_return=5)
+    # aiml_pipeline = AIMLFeaturePipeline(future_return=1)
+    aiml_pipeline = AIMLFeaturePipelineV2(future_return=5)
     # Plot NIFTY and BANKNIFTY
     # fib_pipeline.plot("^NSEI",start="2023-02-01",end="2024-05-02")#period='1y')#,start='2024-01-01',end='2025-01-01')
     # pipeline.plot(["^NSEBANK"])
 
-    LARGE_CAP_TICKERS = [
-        "RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "INFY.NS", "ICICIBANK.NS", "HINDUNILVR.NS",
-        "SBIN.NS", "LT.NS", "AXISBANK.NS", "BAJFINANCE.NS", "KOTAKBANK.NS",
-        "ITC.NS", "BHARTIARTL.NS", "MARUTI.NS", "SUNPHARMA.NS", "WIPRO.NS", "HCLTECH.NS",
-        "M&M.NS", "NTPC.NS", "POWERGRID.NS", "TATAMOTORS.NS", "ULTRACEMCO.NS",
-        "ADANIPORTS.NS", "CIPLA.NS", "DRREDDY.NS", "NESTLEIND.NS", "BAJAJFINSV.NS",
-        "DIVISLAB.NS", "JSWSTEEL.NS", "TATASTEEL.NS", "COALINDIA.NS", "GRASIM.NS",
-        "HDFCLIFE.NS", "TECHM.NS", "UPL.NS", "BRITANNIA.NS", "EICHERMOT.NS", "HINDALCO.NS",
-        "ONGC.NS", "BPCL.NS", "APOLLOHOSP.NS", "HEROMOTOCO.NS", "SBILIFE.NS", "ADANIENT.NS",
-        "BAJAJ-AUTO.NS", "INDUSINDBK.NS", "ICICILOMBARD.NS", "TATACONSUM.NS",
-        "ASIANPAINT.NS", "SHREECEM.NS", "DABUR.NS", "PIDILITIND.NS", "GODREJCP.NS",
-        "HAVELLS.NS", "TORNTPHARM.NS", "COLPAL.NS", "BERGEPAINT.NS",
-        "DLF.NS", "ZEEL.NS", "CHOLAFIN.NS", "MPHASIS.NS", "MINDTREE.NS",
-        "GAIL.NS", "IOC.NS", "PETRONET.NS", "REC.NS", "PNBHOUSING.NS",
-        "BANKBARODA.NS", "FEDERALBNK.NS", "IDFCFIRSTB.NS", "GLAND.NS", "ALKEM.NS",
-        "MAXHEALTH.NS", "ICICIPRULI.NS", "ABB.NS", "SIEMENS.NS", "CUMMINSIND.NS",
-        "BHEL.NS", "ASHOKLEY.NS", "CONCOR.NS", "IRCTC.NS", "LICHSGFIN.NS",
-        "SRF.NS", "ADANIGREEN.NS", "ADANITRANS.NS", "ADANIGAS.NS"]
-
-    MID_CAP_TICKERS = [
-        "MANKIND.NS", "AUROPHARMA.NS", "BANKBARODA.NS", "CANBK.NS", "FEDERALBNK.NS", "LTFH.NS",
-        "GLAND.NS", "GMRINFRA.NS", "GUJGAZ.NS", "INDIGO.NS", "PAGEIND.NS", "MPHASIS.NS",
-        "DIXON.NS", "POLYCAB.NS", "VOLTAS.NS", "TVSMOTOR.NS", "BALKRISIND.NS", "CROMPTON.NS",
-        "BIOCON.NS", "MAXFINANCIAL.NS", "CHOLAFIN.NS", "ICICISEC.NS", "PERSISTENT.NS",
-        "MUTHOOTFIN.NS", "ASTRAL.NS", "JUBILANT.NS", "ABB.NS", "ALKEM.NS",
-        "PIIND.NS", "TATAELXSI.NS", "COROMANDEL.NS", "MANAPPURAM.NS", "ADITYABIRLA.NS",
-        "ALEMBIC.NS", "BATAINDIA.NS", "LTIM.NS", "GODREJPROP.NS", "DEEPAKNTR.NS",
-        "TORNTPHARM.NS", "SUPREMEIND.NS", "THERMAX.NS", "RBLBANK.NS", "SUNDARMFIN.NS",
-        "SHRIRAMFIN.NS", "LAURUSLABS.NS", "UBL.NS", "JSWENERGY.NS", "IDFCFIRSTB.NS",
-        "IEX.NS", "ZYDUSLIFE.NS", "KEI.NS", "BLUESTARCO.NS", "TRENT.NS", "ADANIWIL.NS",
-        "ADANIPOWER.NS", "GUJFLUORO.NS", "CASTROLIND.NS", "INDHOTEL.NS", "RADICO.NS",
-        "APLAPOLLO.NS", "RELAXO.NS", "FINEORG.NS", "HATSUN.NS", "PRESTIGE.NS", "OBEROIRLTY.NS",
-        "VARUNBEV.NS", "EMAMILTD.NS", "ZEEL.NS", "BHEL.NS", "IRCTC.NS", "CONCOR.NS",
-        "IGL.NS", "JSWSTEEL.NS", "CUMMINSIND.NS", "KAJARIACER.NS", "RITES.NS",
-        "SKFINDIA.NS", "HAL.NS", "CESC.NS", "ENDURANCE.NS", "GRINDWELL.NS", "GNFC.NS",
-        "NAVINFLUOR.NS", "LINDEINDIA.NS", "IEX.NS", "AIAENG.NS", "KANSAINER.NS", "BIRLASOFT.NS",
-        "COFORGE.NS", "SYNGENE.NS", "NARAYANA.NS", "FORTIS.NS", "INDRAPRA MEDICAL.NS",
-        "PVR.NS", "INOXLEISUR.NS", "SPANDANA.NS", "CUB.NS", "KVB.NS", "SOUTHBANK.NS"]
-    
-    SMALL_CAP_TICKERS = [
-    "LAURUSLABS.NS", "GOFORTHPHIL.NS", "DELHIVERY.NS", "ASTERDM.NS", "PIRAMALPHAR.NS",
-    "APTUS.NS", "CSCCL.NS", "CITYUNION.NS", "PNCINFRA.NS", "TATACHEM.NS", "HINDCOPPER.NS",
-    "NAVINFLUOR.NS", "BEML.NS", "GRSE.NS", "SCHNEIDER.NS", "GMDC.NS", "CRAG.NS",
-    "CRAFTSMAN.NS", "SCHAFFLER.NS", "MAZDOCK.NS", "COCHIN.NS", "GARDENREACH.NS",
-    "RVNL.NS", "IRCON.NS", "IRFC.NS", "HUDCO.NS", "ENGINERSIND.NS", "NBCC.NS", "RITES.NS",
-    "TANLA.NS", "ROUTE.NS", "SUBEX.NS", "INTELLECT.NS", "HFCL.NS", "TEJASNET.NS",
-    "STERLITE.NS", "DEEPAKFERT.NS", "BALRAMCHIN.NS", "DHAMPURSUG.NS", "EIDPARRY.NS",
-    "AVANTIFEED.NS", "VENKY.NS", "KRBL.NS", "SOMANYCERA.NS", "ORIENTCEM.NS",
-    "INDIACEM.NS", "HEIDELBERG.NS", "JINDALSAW.NS", "WELSPUNCORP.NS", "RATNAMANI.NS",
-    "FINOLEXCAB.NS", "POLYCAB.NS", "BOROSIL.NS", "SWSOLAR.NS", "INOXWIND.NS",
-    "INDIAGLYCO.NS", "GUJALKALI.NS", "DCW.NS", "THIRUMALAI.NS", "RUCHIRA.NS", "JKPAPER.NS",
-    "WESTCOAST.NS", "DISHMAN.NS", "SEQUENT.NS", "CAPLIPOINT.NS", "GRANULES.NS",
-    "NATCO.NS", "NEULAND.NS", "WELSPUNIND.NS", "RAYMOND.NS", "ARVIND.NS", "FLFL.NS",
-    "HIMADRI.NS", "ORIENTCARB.NS", "PNBGILTS.NS", "UJJIVANSFB.NS", "EQUITAS.NS",
-    "CSBBANK.NS", "DCBBANK.NS", "REPCOHOME.NS"]
-
-    tickers = SMALL_CAP_TICKERS #LARGE_CAP_TICKERS #+ MID_CAP_TICKERS #["ABB.NS"] # at least 2 tickers
-    aiml_pipeline.generate_stock_features(tickers, start="2024-01-02",end="2025-11-15",add_index=True,show=False)
+    tickers = SMALL_CAP_TICKERS + LARGE_CAP_TICKERS + MID_CAP_TICKERS #["ABB.NS"] # at least 2 tickers
+    aiml_pipeline.generate_stock_features(tickers, start="2025-01-02",end="2025-12-21",add_index=True,show=False,lookback=5, tp_pct=0.02, sl_pct=0.01)
     # aiml_pipeline.generate_stock_features(tickers, start="2008-05-05", end="2016-09-08", add_index=True, show=False)
     # aiml_pipeline.generate_stock_features(tickers, start="2016-09-02", end="2025-11-15", add_index=True, show=False)
     # aiml_pipeline.generate_index_features(start="2022-02-01",end="2025-05-02")

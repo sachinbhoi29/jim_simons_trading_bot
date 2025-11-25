@@ -301,9 +301,9 @@ def apply_minmax_scaling(df, feature_cols, SCALER_PICKLE):
 # 3️⃣ Script Entry
 # ========================================
 if __name__ == "__main__":
-    SCALER_PICKLE = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/scaler_v1.pkl"  # Update path as needed
-    input_path = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/features_ready.csv"  # Update path as needed
-    output_path = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v3/data/normalized_data_for_ml.csv"  # Update path as needed
+    SCALER_PICKLE = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/data/scaler_v1.pkl"  # Update path as needed
+    input_path = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/data/features_ready.csv"  # Update path as needed
+    output_path = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/data/normalized_data_for_ml.csv"  # Update path as needed
 
     print("Loading raw features...")
     df_raw = pd.read_csv(input_path)

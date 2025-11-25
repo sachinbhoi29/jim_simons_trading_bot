@@ -11,3 +11,26 @@ I have news sentiment analysis, now, what I want is, news sentiment change over 
 only that part is pending from the indicators side
 
 combine both NIFTY and BANKNIFTY
+
+
+
+Even better: Cluster models (Sector-based)
+Instead of 1 model per stock, train 1 model per sector:
+Banks (BankNifty)
+IT
+Pharma
+FMCG
+Metals
+Auto
+Energy
+Midcaps
+✔ much more data
+✔ similar behavior within sectors
+✔ less overfit
+✔ still tailored
+
+Yes — you absolutely can compute:
+Correlation of each stock with NIFTY / BANKNIFTY, and
+Find clusters of similar-behaving stocks (based on returns, volatility, beta, etc.)
+
+we have so many new parameters for backtesting now, bracket order, use them later
