@@ -10,7 +10,7 @@ DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/
 TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/data/"
 
 TARGET_THRESHOLD = 0.005
-THRESHOLD = 0.5715     # fixed probability cutoff
+THRESHOLD = 0.54       # fixed probability cutoff
 
 # ===============================
 # 1️⃣ LOAD DATA
@@ -66,8 +66,25 @@ for name, model in models.items():
 
 probs = np.column_stack(model_prob_list)
 
-# Final ensemble probability = simple mean of 6 models
-df["prob"] = probs.mean(axis=1)
+weights = {
+    "xgb_3d4": 1.0,
+    "lgb_3d4": 1.0,
+    "cat_3d4": 1.0,
+    "xgb_5d5": 1.0,
+    "lgb_5d5": 1.0,
+    "cat_5d5": 1.0,}
+
+# Create a weighted sum of model probabilities
+weighted_probs = np.zeros(len(df))
+
+total_weight = 0
+
+for i, (name, model) in enumerate(models.items()):
+    w = weights[name]
+    weighted_probs += model_prob_list[i] * w
+    total_weight += w
+
+df["prob"] = weighted_probs / total_weight
 
 print("\nEnsemble probability distribution:")
 print(df["prob"].describe(percentiles=[0.9, 0.95, 0.99]))

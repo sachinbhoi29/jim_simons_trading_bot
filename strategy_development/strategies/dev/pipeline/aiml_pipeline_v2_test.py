@@ -1,3 +1,4 @@
+# sector addded
 import os
 import pandas as pd
 import numpy as np
@@ -12,6 +13,14 @@ from overlays.regime_detection_v1 import EnhancedRegimeOverlay
 from utilities.fib_utils import last_price_fib_info
 from candelstick_base.candlestick_chart_v1 import CandlestickChart
 from functools import reduce
+from config.config import SECTORS
+
+
+# Build reverse map: ticker -> sector
+SECTOR_LOOKUP = {}
+for sector, tickers_list in SECTORS.items():
+    for t in tickers_list:
+        SECTOR_LOOKUP[t] = sector
 
 
 # ----------------------------------------------------------
@@ -318,6 +327,11 @@ class AIMLFeaturePipelineV2:
                 df.index = pd.to_datetime(df.index)
                 df.sort_index(inplace=True)
                 df['Ticker'] = ticker
+
+                # Assign sector
+                sector = SECTOR_LOOKUP.get(ticker, "OTHERS")
+                df['Sector'] = sector
+
 
                 # basic immediate features
                 df['Range_pct'] = (df['High'] - df['Low']) / df['Close']

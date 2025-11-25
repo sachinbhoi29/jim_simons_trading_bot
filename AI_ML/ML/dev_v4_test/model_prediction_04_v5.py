@@ -5,13 +5,13 @@ import joblib
 # ===============================
 # ⚙️ CONFIGURATION
 # ===============================
-MODEL_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/models/"
-DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/data/normalized_data_for_ml.csv"
-TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/data/"
+MODEL_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4_test/models/"
+DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4_test/data/normalized_data_for_ml.csv"
+TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4_test/data/"
 
 # FIXED threshold on model ensemble probability to select signals
 TARGET_THRESHOLD = 0.005
-THRESHOLD = 0.594              # FIXED threshold for selecting trades (model-derived)
+THRESHOLD = 0.504              # FIXED threshold for selecting trades (model-derived)
 
 # ===============================
 # 1️⃣ LOAD DATA
@@ -35,9 +35,9 @@ print(f"Total samples: {len(X)}")
 # 2️⃣ LOAD MODELS
 # ===============================
 print("\nLoading trained models...")
-xgb_3d4 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_bank_5d_5p_v1_long.pkl")
-lgb_3d4 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_bank_5d_5p_v1_long.pkl")
-cat_3d4 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_bank_5d_5p_v1_long.pkl")
+xgb_3d4 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_5d_5p_v1_long.pkl")
+lgb_3d4 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_5d_5p_v1_long.pkl")
+cat_3d4 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_5d_5p_v1_long.pkl")
 
 # ===============================
 # 3️⃣ GENERATE ENSEMBLE PROBABILITIES
