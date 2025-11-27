@@ -10,8 +10,8 @@ DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/
 TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/data/"
 
 # FIXED threshold on model ensemble probability to select signals
-TARGET_THRESHOLD = 0.005
-THRESHOLD = 0.594              # FIXED threshold for selecting trades (model-derived)
+TARGET_THRESHOLD = 0.002
+THRESHOLD = 0.553              # FIXED threshold for selecting trades (model-derived)
 
 # ===============================
 # 1️⃣ LOAD DATA
@@ -34,10 +34,10 @@ print(f"Total samples: {len(X)}")
 # ===============================
 # 2️⃣ LOAD MODELS
 # ===============================
-print("\nLoading trained models...")
-xgb_3d4 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_bank_5d_5p_v1_long.pkl")
-lgb_3d4 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_bank_5d_5p_v1_long.pkl")
-cat_3d4 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_bank_5d_5p_v1_long.pkl")
+print("\nLoading trained models...") 
+xgb_3d4 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_ML_1d_2p_v1_long.pkl")
+lgb_3d4 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_ML_1d_2p_v1_long.pkl")
+cat_3d4 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_ML_1d_2p_v1_long.pkl")
 
 # ===============================
 # 3️⃣ GENERATE ENSEMBLE PROBABILITIES
@@ -66,8 +66,14 @@ print(f"\nTrades selected (prob >= {THRESHOLD}): {len(selected)}")
 # ===============================
 # Define "actual positive" for evaluation (no leakage into selection)
 # Here we use future_return > 0 as the ground-truth success. Change if you want a different rule.
+#for long
 df["actual_positive"] = (df["future_return"] > TARGET_THRESHOLD).astype(int)
 selected["actual_positive"] = (selected["future_return"] > TARGET_THRESHOLD).astype(int)
+
+# for short
+# df["actual_positive"] = (df["future_return"] < -TARGET_THRESHOLD).astype(int)
+# selected["actual_positive"] = (selected["future_return"] < -TARGET_THRESHOLD).astype(int)
+
 
 tp = int(((selected["actual_positive"] == 1)).sum())
 fp = int(((selected["actual_positive"] == 0)).sum())
@@ -77,11 +83,20 @@ precision_final = tp / (tp + fp) if total > 0 else 0.0
 recall_final = tp / df["actual_positive"].sum() if df["actual_positive"].sum() > 0 else 0.0
 
 # Win / loss stats on selected trades (use future_return directly)
+#for long
 wins = selected[selected["future_return"] > TARGET_THRESHOLD]["future_return"]
 losses = selected[selected["future_return"] <= TARGET_THRESHOLD]["future_return"]
 
 avg_win = wins.mean() if len(wins) > 0 else 0.0
 avg_loss = -losses.mean() if len(losses) > 0 else 0.0
+
+# for short 
+# wins = selected[selected["future_return"] < -TARGET_THRESHOLD]["future_return"]
+# losses = selected[selected["future_return"] >= -TARGET_THRESHOLD]["future_return"]
+
+# avg_win = -wins.mean()      # convert good short (negative) to positive gain
+# avg_loss = losses.mean()    # positive number (loss)
+
 
 P_win = len(wins) / total if total > 0 else 0.0
 P_loss = len(losses) / total if total > 0 else 0.0

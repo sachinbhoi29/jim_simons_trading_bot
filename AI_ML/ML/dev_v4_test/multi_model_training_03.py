@@ -1,3 +1,4 @@
+# only sector column is added and processed
 # check for threshold value for training
 import pandas as pd
 import numpy as np

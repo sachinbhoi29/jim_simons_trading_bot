@@ -1,3 +1,4 @@
+# only sector column is added and processed
 import pandas as pd
 import numpy as np
 import joblib

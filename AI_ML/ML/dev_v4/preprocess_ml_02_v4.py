@@ -1,9 +1,4 @@
-#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
-#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
-#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
-#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
-#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
-#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
+# v4 works better on 1d and worse on 5d
 import pandas as pd
 import numpy as np
 import os
