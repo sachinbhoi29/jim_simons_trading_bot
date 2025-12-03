@@ -1,4 +1,4 @@
-# v4 works better on 1d and worse on 5d
+# v4 is medicore
 import pandas as pd
 import numpy as np
 import os

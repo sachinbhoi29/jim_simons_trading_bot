@@ -3,7 +3,7 @@ import numpy as np
 import joblib
 
 # ===============================
-# ⚙️ CONFIGURATION
+# CONFIGURATION
 # ===============================
 MODEL_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/models/"
 DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/data/normalized_data_for_ml.csv"
@@ -11,7 +11,11 @@ TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy
 
 # FIXED threshold on model ensemble probability to select signals
 TARGET_THRESHOLD = 0.002
-THRESHOLD = 0.553              # FIXED threshold for selecting trades (model-derived)
+THRESHOLD = 0.65              # FIXED threshold for selecting trades (model-derived)
+POSITION = 'SHORT' # LONG & SHORT
+XGBOOST_MODEL = "XGBoost_model_highconf_gridsearch_optimized_ML_1d_2p_fv5_gsv2_short.pkl"
+LIGHTGBM_MODEL = "LightGBM_model_highconf_gridsearch_optimized_ML_1d_2p_fv5_gsv2_short.pkl"
+CATBOOST_MODEL = "CatBoost_model_highconf_gridsearch_optimized_ML_1d_2p_fv5_gsv2_short.pkl"
 
 # ===============================
 # 1️⃣ LOAD DATA
@@ -34,11 +38,10 @@ print(f"Total samples: {len(X)}")
 # ===============================
 # 2️⃣ LOAD MODELS
 # ===============================
-print("\nLoading trained models...") 
-xgb_3d4 = joblib.load(MODEL_PATH + "XGBoost_model_highconf_ML_1d_2p_v1_long.pkl")
-lgb_3d4 = joblib.load(MODEL_PATH + "LightGBM_model_highconf_ML_1d_2p_v1_long.pkl")
-cat_3d4 = joblib.load(MODEL_PATH + "CatBoost_model_highconf_ML_1d_2p_v1_long.pkl")
-
+print("\nLoading trained models...")                                
+xgb_3d4 = joblib.load(MODEL_PATH + XGBOOST_MODEL)
+lgb_3d4 = joblib.load(MODEL_PATH + LIGHTGBM_MODEL)
+cat_3d4 = joblib.load(MODEL_PATH + CATBOOST_MODEL) 
 # ===============================
 # 3️⃣ GENERATE ENSEMBLE PROBABILITIES
 # ===============================
@@ -67,13 +70,15 @@ print(f"\nTrades selected (prob >= {THRESHOLD}): {len(selected)}")
 # Define "actual positive" for evaluation (no leakage into selection)
 # Here we use future_return > 0 as the ground-truth success. Change if you want a different rule.
 #for long
-df["actual_positive"] = (df["future_return"] > TARGET_THRESHOLD).astype(int)
-selected["actual_positive"] = (selected["future_return"] > TARGET_THRESHOLD).astype(int)
-
-# for short
-# df["actual_positive"] = (df["future_return"] < -TARGET_THRESHOLD).astype(int)
-# selected["actual_positive"] = (selected["future_return"] < -TARGET_THRESHOLD).astype(int)
-
+if POSITION.upper() == 'LONG':
+    print("Position is LONG")
+    df["actual_positive"] = (df["future_return"] > TARGET_THRESHOLD).astype(int)
+    selected["actual_positive"] = (selected["future_return"] > TARGET_THRESHOLD).astype(int)
+elif POSITION.upper() == 'SHORT':
+    df["actual_positive"] = (df["future_return"] < -TARGET_THRESHOLD).astype(int)
+    selected["actual_positive"] = (selected["future_return"] < -TARGET_THRESHOLD).astype(int)
+else:
+    raise ValueError("POSITION must be either LONG or SHORT.")
 
 tp = int(((selected["actual_positive"] == 1)).sum())
 fp = int(((selected["actual_positive"] == 0)).sum())
@@ -84,18 +89,17 @@ recall_final = tp / df["actual_positive"].sum() if df["actual_positive"].sum() >
 
 # Win / loss stats on selected trades (use future_return directly)
 #for long
-wins = selected[selected["future_return"] > TARGET_THRESHOLD]["future_return"]
-losses = selected[selected["future_return"] <= TARGET_THRESHOLD]["future_return"]
+if POSITION.upper() == 'LONG':
+    wins = selected[selected["future_return"] > TARGET_THRESHOLD]["future_return"]
+    losses = selected[selected["future_return"] <= TARGET_THRESHOLD]["future_return"]
+    avg_win = wins.mean() if len(wins) > 0 else 0.0
+    avg_loss = -losses.mean() if len(losses) > 0 else 0.0
+elif POSITION.upper() == 'SHORT':
+    wins = selected[selected["future_return"] < -TARGET_THRESHOLD]["future_return"]
+    losses = selected[selected["future_return"] >= -TARGET_THRESHOLD]["future_return"]
+    avg_win = -wins.mean()      # convert good short (negative) to positive gain
+    avg_loss = losses.mean()    # positive number (loss)
 
-avg_win = wins.mean() if len(wins) > 0 else 0.0
-avg_loss = -losses.mean() if len(losses) > 0 else 0.0
-
-# for short 
-# wins = selected[selected["future_return"] < -TARGET_THRESHOLD]["future_return"]
-# losses = selected[selected["future_return"] >= -TARGET_THRESHOLD]["future_return"]
-
-# avg_win = -wins.mean()      # convert good short (negative) to positive gain
-# avg_loss = losses.mean()    # positive number (loss)
 
 
 P_win = len(wins) / total if total > 0 else 0.0

@@ -9,8 +9,8 @@ MODEL_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML
 DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/data/normalized_data_for_ml.csv"
 TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/data/"
 
-TARGET_THRESHOLD = 0.002
-THRESHOLD = 0.581       # fixed probability cutoff
+TARGET_THRESHOLD = 0.005
+THRESHOLD = 0.60       # fixed probability cutoff
 
 # ===============================
 # 1️⃣ LOAD DATA
@@ -35,14 +35,14 @@ print("\nLoading trained models...")
 
 model_files = {
     # 3D 4P MODELS
-    "xgb_3d4": "XGBoost_model_highconf_gridsearch_optimized_ML_3d_3_4p_v1_long.pkl",
-    "lgb_3d4": "LightGBM_model_highconf_gridsearch_optimized_ML_3d_3_4p_v1_long.pkl",
-    "cat_3d4": "CatBoost_model_highconf_gridsearch_optimized_ML_3d_3_4p_v1_long.pkl",
+    "xgb_3d4": "XGBoost_model_highconf_gridsearch_optimized_ML_3d_3_5p_v1_gsv1_long.pkl",
+    "lgb_3d4": "LightGBM_model_highconf_gridsearch_optimized_ML_3d_3_5p_v1_gsv1_long.pkl",
+    "cat_3d4": "CatBoost_model_highconf_gridsearch_optimized_ML_3d_3_5p_v1_gsv1_long.pkl",
 
     # 5D 5P MODELS (YOUR NEW MODELS)
-    "xgb_5d5": "XGBoost_model_highconf_gridsearch_optimized_ML_5d_5p_v1_long.pkl",
-    "lgb_5d5": "LightGBM_model_highconf_gridsearch_optimized_ML_5d_5p_v1_long.pkl",
-    "cat_5d5": "CatBoost_model_highconf_gridsearch_optimized_ML_5d_5p_v1_long.pkl",
+    "xgb_5d5": "XGBoost_model_highconf_gridsearch_optimized_ML_5d_5p_v1_gsv1_long.pkl",
+    "lgb_5d5": "LightGBM_model_highconf_gridsearch_optimized_ML_5d_5p_v1_gsv1_long.pkl",
+    "cat_5d5": "CatBoost_model_highconf_gridsearch_optimized_ML_5d_5p_v1_gsv1_long.pkl",
 }
 
 models = {}
@@ -162,7 +162,7 @@ print("==================================================================")
 # 6️⃣ SAVE TRADES
 # ===============================
 selected_sorted = selected.sort_values(by="prob", ascending=False)
-output_path = TRADES_SAVE_PATH + "Ensemble_highconf_trades_prediction_only_stats_6model.csv"
+output_path = TRADES_SAVE_PATH + "Ensemble_highconf_trades_prediction_only_stats.csv"
 selected_sorted.to_csv(output_path, index=False)
 
 print(f"\nSaved selected trades to: {output_path}")

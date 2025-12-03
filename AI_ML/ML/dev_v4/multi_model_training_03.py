@@ -44,6 +44,8 @@ df['target_bin'] = (df['future_return'] > TARGET_THRESHOLD).astype(int)
 
 #for short
 # df['target_bin'] = (df['future_return'] < -TARGET_THRESHOLD).astype(int)
+
+
 print("Target counts:\n", df['target_bin'].value_counts())
 
 
