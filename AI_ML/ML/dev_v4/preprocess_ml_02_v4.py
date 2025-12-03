@@ -1,9 +1,4 @@
-#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
-#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
-#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
-#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
-#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
-#!!!!!!!!!!!!!!!!!! V1 performs lot better than v4
+# v4 is medicore
 import pandas as pd
 import numpy as np
 import os

@@ -34,3 +34,5 @@ Correlation of each stock with NIFTY / BANKNIFTY, and
 Find clusters of similar-behaving stocks (based on returns, volatility, beta, etc.)
 
 we have so many new parameters for backtesting now, bracket order, use them later
+
+adding sector as a feature failed because the data might not be that great

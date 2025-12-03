@@ -1,4 +1,4 @@
-# !!!!!!!!!!!!!!!!!!! far better than v4
+# only sector column is added and processed
 import pandas as pd
 import numpy as np
 import os
