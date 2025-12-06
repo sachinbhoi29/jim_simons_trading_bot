@@ -274,7 +274,8 @@ class AIMLFeaturePipelineV2:
     def __init__(self, future_return=5,
                  data_dir="strategy_development/strategies/dev/data",
                  chart_dir="strategy_development/strategies/dev/chart",
-                 use_trading_days=True):
+                 use_trading_days=True,
+                 real_prediction=False):
         """
         future_return : int -> horizon for labels (see use_trading_days)
         use_trading_days : bool -> if True horizon measured in trading rows (recommended).
@@ -284,6 +285,7 @@ class AIMLFeaturePipelineV2:
         self.chart_dir = chart_dir
         self.future_return = future_return
         self.use_trading_days = use_trading_days
+        self.real_prediction = real_prediction   
         os.makedirs(self.data_dir, exist_ok=True)
 
     # ------------------------------------------------------
@@ -416,6 +418,13 @@ class AIMLFeaturePipelineV2:
 
         if final_dfs:
             df_all = pd.concat(final_dfs, axis=0)
+                        
+            # ------------------------------------------------------------
+            #     REAL PREDICTION MODE: Fill all NaN future_return with 0
+            # ------------------------------------------------------------
+            if self.real_prediction:
+                df_all['future_return'] = df_all['future_return'].fillna(0)
+
             out_path = f"{self.data_dir}/all_stocks_full_suite_v2.csv"
             df_all.to_csv(out_path, index=True)
             print(f"V2: Saved all tickers: {df_all.shape[0]} rows -> {out_path}")

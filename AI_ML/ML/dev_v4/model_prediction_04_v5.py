@@ -11,11 +11,11 @@ TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy
 
 # FIXED threshold on model ensemble probability to select signals
 TARGET_THRESHOLD = 0.002
-THRESHOLD = 0.65              # FIXED threshold for selecting trades (model-derived)
+THRESHOLD = 0.635              # FIXED threshold for selecting trades (model-derived)
 POSITION = 'SHORT' # LONG & SHORT
-XGBOOST_MODEL = "XGBoost_model_highconf_gridsearch_optimized_ML_1d_2p_fv5_gsv2_short.pkl"
-LIGHTGBM_MODEL = "LightGBM_model_highconf_gridsearch_optimized_ML_1d_2p_fv5_gsv2_short.pkl"
-CATBOOST_MODEL = "CatBoost_model_highconf_gridsearch_optimized_ML_1d_2p_fv5_gsv2_short.pkl"
+XGBOOST_MODEL = "XGBoost_model_highconf_gridsearch_optimized_ML_1d_2p_fv5_gsv1_short.pkl"
+LIGHTGBM_MODEL = "LightGBM_model_highconf_gridsearch_optimized_ML_1d_2p_fv5_gsv1_short.pkl"
+CATBOOST_MODEL = "CatBoost_model_highconf_gridsearch_optimized_ML_1d_2p_fv5_gsv1_short.pkl"
 
 # ===============================
 # 1️⃣ LOAD DATA
