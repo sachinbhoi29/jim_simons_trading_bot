@@ -275,17 +275,19 @@ class AIMLFeaturePipelineV2:
                  data_dir="strategy_development/strategies/dev/data",
                  chart_dir="strategy_development/strategies/dev/chart",
                  use_trading_days=True,
-                 real_prediction=False):
+                 live_prediction=False):
         """
         future_return : int -> horizon for labels (see use_trading_days)
         use_trading_days : bool -> if True horizon measured in trading rows (recommended).
                               if False horizon measured in calendar days (will map to next trading day).
+        live_prediction : bool -> if True, future_return for the lookahead days will have 0,
+        it will give only probablity for the next trading day, it is 0 because it is not yet known.
         """
         self.data_dir = data_dir
         self.chart_dir = chart_dir
         self.future_return = future_return
         self.use_trading_days = use_trading_days
-        self.real_prediction = real_prediction   
+        self.live_prediction = live_prediction   
         os.makedirs(self.data_dir, exist_ok=True)
 
     # ------------------------------------------------------
@@ -418,11 +420,11 @@ class AIMLFeaturePipelineV2:
 
         if final_dfs:
             df_all = pd.concat(final_dfs, axis=0)
-                        
+
             # ------------------------------------------------------------
             #     REAL PREDICTION MODE: Fill all NaN future_return with 0
             # ------------------------------------------------------------
-            if self.real_prediction:
+            if self.live_prediction:
                 df_all['future_return'] = df_all['future_return'].fillna(0)
 
             out_path = f"{self.data_dir}/all_stocks_full_suite_v2.csv"
