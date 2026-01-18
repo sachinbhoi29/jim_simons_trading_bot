@@ -17,7 +17,7 @@ DATA_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/
 MODEL_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/models/"
 TRADES_SAVE_PATH = "C:/PERSONAL_DATA/Startups/Stocks/Jim_Simons_Trading_Strategy/AI_ML/ML/dev_v4/data/"
 
-TARGET_THRESHOLD = 0.002       # top 
+TARGET_THRESHOLD = 0.003       # top 
 MIN_TRADES = 1000              # minimum high-confidence trades
 PRECISION_FLOOR = 0.80         # minimum acceptable precision
 

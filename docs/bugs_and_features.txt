@@ -18,3 +18,5 @@ Ensemble 9 models
 3 models 5d@5% — rarer, high-confidence moves; good for picking larger trends and spikes.
 
 Together they cover multiple time scales and trade sizes. Ensembleing them lets you harvest both frequency (1d) and magnitude/confidence (5d).
+
+Implement Kelly Criteria
