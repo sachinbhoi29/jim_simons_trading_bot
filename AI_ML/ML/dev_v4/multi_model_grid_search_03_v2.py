@@ -39,10 +39,10 @@ df['Ticker'] = df['Ticker'].astype(str)
 # 2️⃣ Define target
 # ===============================
 # for long
-df['target_bin'] = (df['future_return'] > TARGET_THRESHOLD).astype(int)
+# df['target_bin'] = (df['future_return'] > TARGET_THRESHOLD).astype(int)
 
 #for short
-# df['target_bin'] = (df['future_return'] < -TARGET_THRESHOLD).astype(int)
+df['target_bin'] = (df['future_return'] < -TARGET_THRESHOLD).astype(int)
 
 
 
